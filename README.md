@@ -36,13 +36,13 @@ auth_token = "personal-token-here"
 # List available contexts
 ccctx list
 
-# Switch to a context (interactive mode)
+# Switch to a context (interactive mode with arrow keys)
 ccctx switch
 
 # Switch to a specific context
 ccctx switch work
 
-# Run claude-code with a context (interactive mode)
+# Run claude-code with a context (interactive mode with arrow keys)
 ccctx run
 
 # Run claude-code with a specific context
@@ -60,6 +60,11 @@ eval $(ccctx switch work)
 This way, the environment variables `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` will be set in your current shell session.
 
 For temporary context switching, you can use the `run` command which will execute claude-code with the specified context without affecting your current shell environment.
+
+In interactive mode (when no context name is provided), you can:
+- Use arrow keys (↑ ↓) to navigate between contexts
+- Press Enter to select the highlighted context
+- Type the number corresponding to a context to jump directly to it
 
 ## Environment Variables
 

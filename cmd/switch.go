@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/dsdashun/ccctx/config"
+	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
 
@@ -27,21 +28,20 @@ var SwitchCmd = &cobra.Command{
 				return
 			}
 
-			fmt.Println("Available contexts:")
-			for i, ctx := range contexts {
-				fmt.Printf("%d. %s\n", i+1, ctx)
+			// Create interactive selector
+			prompt := promptui.Select{
+				Label: "Select a context",
+				Items: contexts,
+				Size:  10, // Show 10 items at a time
 			}
 
-			fmt.Print("Enter context number: ")
-			var choice int
-			_, err = fmt.Scanf("%d", &choice)
-			if err != nil || choice < 1 || choice > len(contexts) {
-				fmt.Fprintf(os.Stderr, "Invalid choice\n")
+			_, result, err := prompt.Run()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 				os.Exit(1)
 			}
 
-			selectedContext := contexts[choice-1]
-			printExportCommands(selectedContext)
+			printExportCommands(result)
 		} else {
 			// Direct mode
 			printExportCommands(args[0])
