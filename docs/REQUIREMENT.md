@@ -1,4 +1,4 @@
-# Claude-Code Context Switcher
+# Claude Code Context Switcher
 
 ## Background
 As a claude-code user, I often need to switch the model provider to use this program by setting two key environment variables: `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` .  

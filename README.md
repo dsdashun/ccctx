@@ -1,11 +1,11 @@
-# ccctx - Claude Context Switcher
+# ccctx - Claude Code Context Switcher
 
-A CLI tool to manage and run Claude with different contexts.
+A CLI tool to manage and run Claude Code with different contexts.
 
 ## Features
 
 - List available contexts from a configuration file
-- Run Claude with a specific context temporarily
+- Run Claude Code with a specific context temporarily
 
 ## Installation
 
@@ -35,16 +35,16 @@ auth_token = "personal-token-here"
 # List available contexts
 ccctx list
 
-# Run Claude with a context (interactive mode with arrow keys)
+# Run Claude Code with a context (interactive mode with arrow keys)
 ccctx run
 
-# Run Claude with a specific context
+# Run Claude Code with a specific context
 ccctx run personal
 ```
 
 ## How It Works
 
-The `run` command executes Claude with the specified context environment variables without affecting your current shell environment.
+The `run` command executes Claude Code with the specified context environment variables without affecting your current shell environment.
 
 In interactive mode (when no context name is provided), you can:
 - Use arrow keys (↑ ↓) to navigate between contexts
