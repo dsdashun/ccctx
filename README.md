@@ -49,7 +49,7 @@ The `run` command executes Claude with the specified context environment variabl
 In interactive mode (when no context name is provided), you can:
 - Use arrow keys (↑ ↓) to navigate between contexts
 - Press Enter to select the highlighted context
-- Type the number corresponding to a context to jump directly to it
+- The interface is now powered by tview for a richer terminal experience
 
 ## Environment Variables
 

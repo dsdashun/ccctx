@@ -6,7 +6,7 @@ import (
 	"os/exec"
 
 	"github.com/dsdashun/ccctx/config"
-	"github.com/manifoldco/promptui"
+	"github.com/dsdashun/ccctx/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -19,32 +19,17 @@ var RunCmd = &cobra.Command{
 		var contextName string
 		
 		if len(args) == 0 {
-			// Interactive mode
-			contexts, err := config.ListContexts()
+			// Interactive mode - use the UI selector
+			var err error
+			contextName, err = ui.RunContextSelector()
 			if err != nil {
+				if err.Error() == "operation cancelled" {
+					fmt.Println("Operation cancelled.")
+					return
+				}
 				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 				os.Exit(1)
 			}
-
-			if len(contexts) == 0 {
-				fmt.Println("No contexts found.")
-				return
-			}
-
-			// Create interactive selector
-			prompt := promptui.Select{
-				Label: "Select a context to run with",
-				Items: contexts,
-				Size:  10, // Show 10 items at a time
-			}
-
-			_, result, err := prompt.Run()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-				os.Exit(1)
-			}
-
-			contextName = result
 		} else {
 			contextName = args[0]
 		}
