@@ -1,12 +1,11 @@
 # ccctx - Claude Context Switcher
 
-A CLI tool to manage and switch between different Claude contexts.
+A CLI tool to manage and run Claude with different contexts.
 
 ## Features
 
 - List available contexts from a configuration file
-- Switch between contexts interactively or by name
-- Run claude with a specific context temporarily
+- Run Claude with a specific context temporarily
 
 ## Installation
 
@@ -36,30 +35,16 @@ auth_token = "personal-token-here"
 # List available contexts
 ccctx list
 
-# Switch to a context (interactive mode with arrow keys)
-ccctx switch
-
-# Switch to a specific context
-ccctx switch work
-
-# Run claude with a context (interactive mode with arrow keys)
+# Run Claude with a context (interactive mode with arrow keys)
 ccctx run
 
-# Run claude with a specific context
+# Run Claude with a specific context
 ccctx run personal
 ```
 
 ## How It Works
 
-When you use `ccctx switch`, it outputs the necessary export commands to set the environment variables in your current shell. You need to use it with `eval`:
-
-```bash
-eval $(ccctx switch work)
-```
-
-This way, the environment variables `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` will be set in your current shell session.
-
-For temporary context switching, you can use the `run` command which will execute claude with the specified context without affecting your current shell environment.
+The `run` command executes Claude with the specified context environment variables without affecting your current shell environment.
 
 In interactive mode (when no context name is provided), you can:
 - Use arrow keys (↑ ↓) to navigate between contexts
@@ -69,7 +54,3 @@ In interactive mode (when no context name is provided), you can:
 ## Environment Variables
 
 - `CCCTX_CONFIG_PATH`: Override the default config file path (`~/.ccctx/config.toml`)
-
-## Why use eval?
-
-The `ccctx switch` command prints export statements that need to be evaluated in your current shell to take effect. This is the standard approach for tools that modify environment variables in the current session, as a child process cannot directly modify its parent's environment. The `eval` command executes the output of `ccctx switch` in the current shell, making the environment variables available.
