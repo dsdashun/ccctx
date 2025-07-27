@@ -11,27 +11,129 @@ import (
 )
 
 var RunCmd = &cobra.Command{
-	Use:   "run [context]",
+	Use:   "run [context] [-- claude-args...]",
 	Short: "Run claude with a context",
-	Long:  "Run claude with the specified context or interactively select one",
-	Args:  cobra.MaximumNArgs(1),
+	Long:  "Run claude with the specified context or interactively select one. Arguments after '--' are passed to claude.",
+	Args:  cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		var contextName string
+		var claudeArgs []string
 		
-		if len(args) == 0 {
-			// Interactive mode - use the UI selector
-			var err error
-			contextName, err = ui.RunContextSelector()
-			if err != nil {
-				if err.Error() == "operation cancelled" {
-					fmt.Println("Operation cancelled.")
+		// Find the position of '--' separator if it exists
+		separatorIndex := -1
+		for i, arg := range args {
+			if arg == "--" {
+				separatorIndex = i
+				break
+			}
+		}
+		
+		// Parse arguments
+		if separatorIndex != -1 {
+			// Everything before '--' are our args, everything after are claude args
+			contextArgs := args[:separatorIndex]
+			claudeArgs = args[separatorIndex+1:]
+			
+			if len(contextArgs) > 0 {
+				contextName = contextArgs[0]
+			} else {
+				// Interactive mode - use the UI selector
+				contexts, err := config.ListContexts()
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+					os.Exit(1)
+				}
+
+				if len(contexts) == 0 {
+					fmt.Println("No contexts found.")
 					return
 				}
-				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-				os.Exit(1)
+				
+				var selectorErr error
+				contextName, selectorErr = ui.RunContextSelector()
+				if selectorErr != nil {
+					if selectorErr.Error() == "operation cancelled" {
+						fmt.Println("Operation cancelled.")
+						return
+					}
+					fmt.Fprintf(os.Stderr, "Error: %v\n", selectorErr)
+					os.Exit(1)
+				}
 			}
 		} else {
-			contextName = args[0]
+			// No separator, check if first arg is a context name
+			if len(args) > 0 {
+				contexts, err := config.ListContexts()
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+					os.Exit(1)
+				}
+				
+				// If first arg matches a context, use it as context name
+				isContext := false
+				for _, ctx := range contexts {
+					if args[0] == ctx {
+						isContext = true
+						break
+					}
+				}
+				
+				if isContext {
+					contextName = args[0]
+					// All other args are claude args
+					claudeArgs = args[1:]
+				} else {
+					// First arg is not a context, so we're in interactive mode
+					// All args are claude args
+					claudeArgs = args
+					
+					// Interactive mode - use the UI selector
+					contexts, err := config.ListContexts()
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+						os.Exit(1)
+					}
+
+					if len(contexts) == 0 {
+						fmt.Println("No contexts found.")
+						return
+					}
+					
+					var selectorErr error
+					contextName, selectorErr = ui.RunContextSelector()
+					if selectorErr != nil {
+						if selectorErr.Error() == "operation cancelled" {
+							fmt.Println("Operation cancelled.")
+							return
+						}
+						fmt.Fprintf(os.Stderr, "Error: %v\n", selectorErr)
+						os.Exit(1)
+					}
+				}
+			} else {
+				// Interactive mode - use the UI selector
+				contexts, err := config.ListContexts()
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+					os.Exit(1)
+				}
+
+				if len(contexts) == 0 {
+					fmt.Println("No contexts found.")
+					return
+				}
+				
+				var selectorErr error
+				contextName, selectorErr = ui.RunContextSelector()
+				if selectorErr != nil {
+					if selectorErr.Error() == "operation cancelled" {
+						fmt.Println("Operation cancelled.")
+						return
+					}
+					fmt.Fprintf(os.Stderr, "Error: %v\n", selectorErr)
+					os.Exit(1)
+				}
+			}
 		}
 
 		// Get context details
@@ -65,8 +167,8 @@ var RunCmd = &cobra.Command{
 		newEnv = append(newEnv, fmt.Sprintf("ANTHROPIC_BASE_URL=%s", ctx.BaseURL))
 		newEnv = append(newEnv, fmt.Sprintf("ANTHROPIC_AUTH_TOKEN=%s", ctx.AuthToken))
 
-		// Execute claude with the modified environment
-		cmdClaude := exec.Command(claudePath)
+		// Execute claude with the modified environment and forwarded args
+		cmdClaude := exec.Command(claudePath, claudeArgs...)
 		cmdClaude.Env = newEnv
 		cmdClaude.Stdin = os.Stdin
 		cmdClaude.Stdout = os.Stdout

@@ -35,11 +35,20 @@ auth_token = "personal-token-here"
 # List available contexts
 ccctx list
 
-# Run Claude Code with a context (interactive mode with arrow keys)
+# Run Claude with a context (interactive mode with arrow keys)
 ccctx run
 
-# Run Claude Code with a specific context
+# Run Claude with a specific context
 ccctx run personal
+
+# Run Claude with a specific context and additional arguments
+ccctx run personal -- --help
+
+# Run Claude in interactive mode with additional arguments
+ccctx run -- --version
+
+# Run Claude with model specification
+ccctx run -- --model=xxxxx
 ```
 
 ## How It Works
@@ -51,6 +60,9 @@ In interactive mode (when no context name is provided), you can:
 - Press Enter to select the highlighted context
 - Press ESC to cancel the operation
 - The interface is now powered by tview for a richer terminal experience
+
+All arguments after the `--` separator are forwarded to Claude, allowing you to use Claude's full functionality.
+For example: `ccctx run personal -- --help` or `ccctx run -- --version`
 
 ## Environment Variables
 
