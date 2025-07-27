@@ -10,8 +10,8 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "ccctx",
-	Short: "Claude-Code Context Switcher",
-	Long:  "A CLI tool to manage and switch between different Claude-Code contexts",
+	Short: "Claude Context Switcher",
+	Long:  "A CLI tool to manage and switch between different Claude contexts",
 }
 
 func init() {

@@ -1,12 +1,12 @@
-# ccctx - Claude-Code Context Switcher
+# ccctx - Claude Context Switcher
 
-A CLI tool to manage and switch between different Claude-Code contexts.
+A CLI tool to manage and switch between different Claude contexts.
 
 ## Features
 
 - List available contexts from a configuration file
 - Switch between contexts interactively or by name
-- Run claude-code with a specific context temporarily
+- Run claude with a specific context temporarily
 
 ## Installation
 
@@ -42,10 +42,10 @@ ccctx switch
 # Switch to a specific context
 ccctx switch work
 
-# Run claude-code with a context (interactive mode with arrow keys)
+# Run claude with a context (interactive mode with arrow keys)
 ccctx run
 
-# Run claude-code with a specific context
+# Run claude with a specific context
 ccctx run personal
 ```
 
@@ -59,7 +59,7 @@ eval $(ccctx switch work)
 
 This way, the environment variables `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` will be set in your current shell session.
 
-For temporary context switching, you can use the `run` command which will execute claude-code with the specified context without affecting your current shell environment.
+For temporary context switching, you can use the `run` command which will execute claude with the specified context without affecting your current shell environment.
 
 In interactive mode (when no context name is provided), you can:
 - Use arrow keys (↑ ↓) to navigate between contexts
