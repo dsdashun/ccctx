@@ -69,3 +69,7 @@ In interactive mode (when no context name is provided), you can:
 ## Environment Variables
 
 - `CCCTX_CONFIG_PATH`: Override the default config file path (`~/.ccctx/config.toml`)
+
+## Why use eval?
+
+The `ccctx switch` command prints export statements that need to be evaluated in your current shell to take effect. This is the standard approach for tools that modify environment variables in the current session, as a child process cannot directly modify its parent's environment. The `eval` command executes the output of `ccctx switch` in the current shell, making the environment variables available.
