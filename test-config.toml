@@ -1,0 +1,11 @@
+[context.work]
+base_url = "https://api.anthropic.com/work"
+auth_token = "work-token-12345"
+
+[context.home]
+base_url = "https://api.anthropic.com/home"
+auth_token = "home-token-67890"
+
+[context.development]
+base_url = "https://api.anthropic.com/dev"
+auth_token = "dev-token-abcde"

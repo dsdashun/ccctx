@@ -1,0 +1,100 @@
+package config
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/spf13/viper"
+)
+
+type Context struct {
+	BaseURL   string `mapstructure:"base_url"`
+	AuthToken string `mapstructure:"auth_token"`
+}
+
+type Config struct {
+	Contexts map[string]Context `mapstructure:"context"`
+}
+
+func GetConfigPath() (string, error) {
+	// Check for environment variable override first
+	if path := os.Getenv("CCCTX_CONFIG_PATH"); path != "" {
+		return path, nil
+	}
+	
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, ".ccctx", "config.toml"), nil
+}
+
+func LoadConfig() (*Config, error) {
+	configPath, err := GetConfigPath()
+	if err != nil {
+		return nil, err
+	}
+
+	// Create config directory if it doesn't exist
+	dir := filepath.Dir(configPath)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return nil, err
+		}
+	}
+
+	// Create default config file if it doesn't exist
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		defaultConfig := `# Claude-Code Context Configuration
+[context.example]
+base_url = "https://api.anthropic.com"
+auth_token = "your-auth-token-here"
+`
+		if err := os.WriteFile(configPath, []byte(defaultConfig), 0644); err != nil {
+			return nil, err
+		}
+	}
+
+	viper.SetConfigFile(configPath)
+	viper.SetConfigType("toml")
+
+	if err := viper.ReadInConfig(); err != nil {
+		return nil, fmt.Errorf("failed to read config file: %w", err)
+	}
+
+	var config Config
+	if err := viper.Unmarshal(&config); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
+	}
+
+	return &config, nil
+}
+
+func ListContexts() ([]string, error) {
+	config, err := LoadConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	var contexts []string
+	for name := range config.Contexts {
+		contexts = append(contexts, name)
+	}
+
+	return contexts, nil
+}
+
+func GetContext(name string) (*Context, error) {
+	config, err := LoadConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	context, exists := config.Contexts[name]
+	if !exists {
+		return nil, fmt.Errorf("context '%s' not found", name)
+	}
+
+	return &context, nil
+}
