@@ -61,12 +61,30 @@ func runTviewSelector(contexts []string) (string, error) {
 	var selectedContext string
 	var cancelled bool
 
-	// Set input capture to handle ESC key
+	// Set input capture to handle ESC key and vim key bindings
 	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyEscape {
+		switch event.Key() {
+		case tcell.KeyEscape:
 			cancelled = true
 			app.Stop()
 			return nil
+		case tcell.KeyRune:
+			switch event.Rune() {
+			case 'j':
+				// Move down
+				currentIndex := list.GetCurrentItem()
+				if currentIndex < list.GetItemCount()-1 {
+					list.SetCurrentItem(currentIndex + 1)
+				}
+				return nil
+			case 'k':
+				// Move up
+				currentIndex := list.GetCurrentItem()
+				if currentIndex > 0 {
+					list.SetCurrentItem(currentIndex - 1)
+				}
+				return nil
+			}
 		}
 		return event
 	})

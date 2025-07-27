@@ -44,11 +44,12 @@ ccctx run personal
 
 ## How It Works
 
-The `run` command executes Claude Code with the specified context environment variables without affecting your current shell environment.
+The `run` command executes Claude with the specified context environment variables without affecting your current shell environment.
 
 In interactive mode (when no context name is provided), you can:
-- Use arrow keys (↑ ↓) to navigate between contexts
+- Use arrow keys (↑ ↓) or vim keys (j/k) to navigate between contexts
 - Press Enter to select the highlighted context
+- Press ESC to cancel the operation
 - The interface is now powered by tview for a richer terminal experience
 
 ## Environment Variables

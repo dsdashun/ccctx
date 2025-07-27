@@ -11,12 +11,12 @@ all: build
 # Build the binary
 .PHONY: build
 build:
-	go build -o ${BINARY} .
+	CGO_ENABLED=0 go build -o ${BINARY} .
 
 # Install the binary to GOPATH/bin
 .PHONY: install
 install:
-	go install .
+	CGO_ENABLED=0 go install .
 
 # Clean build artifacts
 .PHONY: clean
