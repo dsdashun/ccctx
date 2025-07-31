@@ -6,6 +6,7 @@ A CLI tool to manage and run Claude Code with different contexts.
 
 - List available contexts from a configuration file
 - Run Claude Code with a specific context temporarily
+- Support for environment variables in authentication tokens for enhanced security
 
 ## Installation
 
@@ -26,7 +27,11 @@ auth_token = "work-token-here"
 
 [context.personal]
 base_url = "https://api.anthropic.com"
-auth_token = "personal-token-here"
+auth_token = "env:ANTHROPIC_PERSONAL_TOKEN"
+
+[context.staging]
+base_url = "https://api.anthropic.com"
+auth_token = "env:ANTHROPIC_STAGING_TOKEN"
 ```
 
 ## Usage
@@ -63,6 +68,27 @@ In interactive mode (when no context name is provided), you can:
 
 All arguments after the `--` separator are forwarded to Claude, allowing you to use Claude's full functionality.
 For example: `ccctx run personal -- --help` or `ccctx run -- --version`
+
+## Environment Variables in Authentication
+
+For enhanced security, you can use environment variables instead of hardcoding authentication tokens in your configuration file. Use the `env:` prefix followed by the environment variable name:
+
+```toml
+[context.production]
+base_url = "https://api.anthropic.com"
+auth_token = "env:ANTHROPIC_API_KEY"
+```
+
+When using this format:
+- The tool will read the value from the specified environment variable
+- If the environment variable is not set or empty, an error will be displayed
+- This prevents accidentally committing sensitive tokens to version control
+
+**Important:** Make sure to export the environment variable in your shell:
+```bash
+export ANTHROPIC_API_KEY="your-api-key-here"
+# Or add to your ~/.bashrc file
+```
 
 ## Environment Variables
 

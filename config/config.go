@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -15,6 +16,23 @@ type Context struct {
 
 type Config struct {
 	Contexts map[string]Context `mapstructure:"context"`
+}
+
+func resolveEnvVar(value string) (string, error) {
+	if strings.HasPrefix(value, "env:") {
+		envVar := strings.TrimPrefix(value, "env:")
+		if envVar == "" {
+			return "", fmt.Errorf("environment variable name cannot be empty")
+		}
+		
+		envValue := os.Getenv(envVar)
+		if envValue == "" {
+			return "", fmt.Errorf("environment variable '%s' is not set or empty", envVar)
+		}
+		
+		return envValue, nil
+	}
+	return value, nil
 }
 
 func GetConfigPath() (string, error) {
@@ -96,5 +114,16 @@ func GetContext(name string) (*Context, error) {
 		return nil, fmt.Errorf("context '%s' not found", name)
 	}
 
-	return &context, nil
+	// Resolve environment variables in auth token
+	resolvedAuthToken, err := resolveEnvVar(context.AuthToken)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve auth token for context '%s': %w", name, err)
+	}
+
+	resolvedContext := Context{
+		BaseURL:   context.BaseURL,
+		AuthToken: resolvedAuthToken,
+	}
+
+	return &resolvedContext, nil
 }
