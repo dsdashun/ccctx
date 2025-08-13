@@ -154,11 +154,13 @@ var RunCmd = &cobra.Command{
 		// Start with a clean environment based on the current one
 		env := os.Environ()
 		
-		// Remove any existing ANTHROPIC_BASE_URL and ANTHROPIC_AUTH_TOKEN
+		// Remove any existing ANTHROPIC environment variables
 		newEnv := []string{}
 		for _, e := range env {
 			if !(len(e) >= 19 && e[:19] == "ANTHROPIC_BASE_URL=") && 
-			   !(len(e) >= 20 && e[:20] == "ANTHROPIC_AUTH_TOKEN=") {
+			   !(len(e) >= 20 && e[:20] == "ANTHROPIC_AUTH_TOKEN=") &&
+			   !(len(e) >= 15 && e[:15] == "ANTHROPIC_MODEL=") &&
+			   !(len(e) >= 28 && e[:28] == "ANTHROPIC_SMALL_FAST_MODEL=") {
 				newEnv = append(newEnv, e)
 			}
 		}
@@ -166,6 +168,14 @@ var RunCmd = &cobra.Command{
 		// Add the new context variables
 		newEnv = append(newEnv, fmt.Sprintf("ANTHROPIC_BASE_URL=%s", ctx.BaseURL))
 		newEnv = append(newEnv, fmt.Sprintf("ANTHROPIC_AUTH_TOKEN=%s", ctx.AuthToken))
+		
+		// Add model variables if configured
+		if ctx.Model != "" {
+			newEnv = append(newEnv, fmt.Sprintf("ANTHROPIC_MODEL=%s", ctx.Model))
+		}
+		if ctx.SmallFastModel != "" {
+			newEnv = append(newEnv, fmt.Sprintf("ANTHROPIC_SMALL_FAST_MODEL=%s", ctx.SmallFastModel))
+		}
 
 		// Execute claude with the modified environment and forwarded args
 		cmdClaude := exec.Command(claudePath, claudeArgs...)

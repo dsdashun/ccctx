@@ -10,8 +10,10 @@ import (
 )
 
 type Context struct {
-	BaseURL   string `mapstructure:"base_url"`
-	AuthToken string `mapstructure:"auth_token"`
+	BaseURL        string `mapstructure:"base_url"`
+	AuthToken      string `mapstructure:"auth_token"`
+	Model          string `mapstructure:"model"`
+	SmallFastModel string `mapstructure:"small_fast_model"`
 }
 
 type Config struct {
@@ -68,6 +70,9 @@ func LoadConfig() (*Config, error) {
 [context.example]
 base_url = "https://api.anthropic.com"
 auth_token = "your-auth-token-here"
+# Optional: specify model explicitly
+# model = "claude-3-5-sonnet-20241022"
+# small_fast_model = "claude-3-5-haiku-20241022"
 `
 		if err := os.WriteFile(configPath, []byte(defaultConfig), 0644); err != nil {
 			return nil, err
@@ -121,8 +126,10 @@ func GetContext(name string) (*Context, error) {
 	}
 
 	resolvedContext := Context{
-		BaseURL:   context.BaseURL,
-		AuthToken: resolvedAuthToken,
+		BaseURL:        context.BaseURL,
+		AuthToken:      resolvedAuthToken,
+		Model:          context.Model,
+		SmallFastModel: context.SmallFastModel,
 	}
 
 	return &resolvedContext, nil
