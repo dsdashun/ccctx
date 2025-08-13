@@ -24,10 +24,13 @@ Example configuration:
 [context.work]
 base_url = "https://api.anthropic.com"
 auth_token = "work-token-here"
+model = "claude-3-5-sonnet-20241022"
 
 [context.personal]
 base_url = "https://api.anthropic.com"
 auth_token = "env:ANTHROPIC_PERSONAL_TOKEN"
+model = "claude-3-5-haiku-20241022"
+small_fast_model = "claude-3-5-haiku-20241022"
 
 [context.staging]
 base_url = "https://api.anthropic.com"
@@ -68,6 +71,23 @@ In interactive mode (when no context name is provided), you can:
 
 All arguments after the `--` separator are forwarded to Claude, allowing you to use Claude's full functionality.
 For example: `ccctx run personal -- --help` or `ccctx run -- --version`
+
+## Model Configuration
+
+You can optionally specify model preferences for each context using the `model` and `small_fast_model` fields:
+
+```toml
+[context.production]
+base_url = "https://api.anthropic.com"
+auth_token = "env:ANTHROPIC_API_KEY"
+model = "claude-3-5-sonnet-20241022"
+small_fast_model = "claude-3-5-haiku-20241022"
+```
+
+When these fields are provided:
+- `model` sets the `ANTHROPIC_MODEL` environment variable
+- `small_fast_model` sets the `ANTHROPIC_SMALL_FAST_MODEL` environment variable
+- Both fields are optional - if not provided, the environment variables won't be set
 
 ## Environment Variables in Authentication
 
