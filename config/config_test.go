@@ -2,7 +2,11 @@ package config
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestResolveEnvVar(t *testing.T) {
@@ -99,6 +103,65 @@ func TestResolveEnvVar(t *testing.T) {
 
 			if got != tt.want {
 				t.Errorf("resolveEnvVar() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestConfigFilePermissions(t *testing.T) {
+	tests := []struct {
+		name        string
+		createFirst bool
+		initialPerm os.FileMode
+	}{
+		{
+			name:        "auto-created file has 0600 permissions",
+			createFirst: false,
+		},
+		{
+			name:        "existing file with 0644 is not modified",
+			createFirst: true,
+			initialPerm: 0644,
+		},
+		{
+			name:        "existing file with 0400 is not modified",
+			createFirst: true,
+			initialPerm: 0400,
+		},
+		{
+			name:        "existing file with 0666 is not modified",
+			createFirst: true,
+			initialPerm: 0666,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			configPath := filepath.Join(tmpDir, "config.toml")
+
+			var beforePerm os.FileMode
+			if tt.createFirst {
+				content := []byte("[context.test]\nbase_url = \"https://example.com\"\nauth_token = \"token\"\n")
+				err := os.WriteFile(configPath, content, tt.initialPerm)
+				require.NoError(t, err)
+
+				info, err := os.Stat(configPath)
+				require.NoError(t, err)
+				beforePerm = info.Mode().Perm()
+			}
+
+			t.Setenv("CCCTX_CONFIG_PATH", configPath)
+			_, err := LoadConfig()
+			require.NoError(t, err)
+
+			info, err := os.Stat(configPath)
+			require.NoError(t, err)
+
+			if tt.createFirst {
+				assert.Equal(t, beforePerm, info.Mode().Perm(), "LoadConfig() modified existing file permissions")
+			} else {
+				assert.Equal(t, os.FileMode(0600), info.Mode().Perm())
 			}
 		})
 	}
