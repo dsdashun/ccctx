@@ -26,12 +26,12 @@ func resolveEnvVar(value string) (string, error) {
 		if envVar == "" {
 			return "", fmt.Errorf("environment variable name cannot be empty")
 		}
-		
+
 		envValue := os.Getenv(envVar)
 		if envValue == "" {
 			return "", fmt.Errorf("environment variable '%s' is not set or empty", envVar)
 		}
-		
+
 		return envValue, nil
 	}
 	return value, nil
@@ -42,7 +42,7 @@ func GetConfigPath() (string, error) {
 	if path := os.Getenv("CCCTX_CONFIG_PATH"); path != "" {
 		return path, nil
 	}
-	
+
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err

@@ -80,7 +80,7 @@ func TestResolveEnvVar(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := resolveEnvVar(tt.input)
-			
+
 			if tt.wantErr {
 				if err == nil {
 					t.Errorf("resolveEnvVar() expected error, got nil")
@@ -91,12 +91,12 @@ func TestResolveEnvVar(t *testing.T) {
 				}
 				return
 			}
-			
+
 			if err != nil {
 				t.Errorf("resolveEnvVar() unexpected error = %v", err)
 				return
 			}
-			
+
 			if got != tt.want {
 				t.Errorf("resolveEnvVar() = %v, want %v", got, tt.want)
 			}

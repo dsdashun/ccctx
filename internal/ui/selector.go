@@ -26,34 +26,34 @@ func RunContextSelector() (string, error) {
 
 func runTviewSelector(contexts []string) (string, error) {
 	app := tview.NewApplication()
-	
+
 	// Create a flex layout to hold the title and list
 	flex := tview.NewFlex().SetDirection(tview.FlexRow)
-	
+
 	// Create title text
 	title := tview.NewTextView().
 		SetText("Select a context to run with (ESC to cancel)").
 		SetTextColor(tview.Styles.SecondaryTextColor).
 		SetTextAlign(tview.AlignLeft)
-	
+
 	// Create the list
 	list := tview.NewList().ShowSecondaryText(false)
-	
+
 	// Add contexts to the list
 	for _, ctx := range contexts {
 		list.AddItem(ctx, "", 0, nil)
 	}
-	
+
 	// Add title and list to the flex layout
 	flex.AddItem(title, 1, 0, false).
 		AddItem(list, 0, 1, true)
-	
+
 	// Set the flex layout to a more compact size
 	maxItems := len(contexts)
 	if maxItems > 10 {
 		maxItems = 10
 	}
-	
+
 	// Position the flex layout in the upper part of the screen
 	flex.SetRect(0, 1, 50, maxItems+4) // x, y, width, height
 
