@@ -14,3 +14,9 @@
 - Environment variable injection edge case with empty values [internal/runner/runner.go:66-77] — deferred, pre-existing
 - Default config file created with world-readable permissions [config/config.go:77] — deferred, pre-existing
 - LoadConfig uses global viper singleton [config/config.go:82-91] — deferred, pre-existing
+
+## Deferred from: code review of 1-3-implement-exec-subcommand-core-command (2026-04-19)
+
+- runner.Run double-prints non-ExitError failures [internal/runner/runner.go:51-57, cmd/exec.go:62-66] — deferred, pre-existing
+- ParseArgs treats flags before `--` as context names [internal/runner/args.go:30-34] — deferred, pre-existing
+- os.Exit calls bypass future defer cleanup [cmd/exec.go] — deferred, pre-existing
