@@ -20,3 +20,8 @@
 - runner.Run double-prints non-ExitError failures [internal/runner/runner.go:51-57, cmd/exec.go:62-66] — deferred, pre-existing
 - ParseArgs treats flags before `--` as context names [internal/runner/args.go:30-34] — deferred, pre-existing
 - os.Exit calls bypass future defer cleanup [cmd/exec.go] — deferred, pre-existing
+
+## Deferred from: code review of 1-4-fix-config-file-permissions (2026-04-19)
+
+- 非 "not exist" 的 `os.Stat` 错误被静默忽略 [config/config.go:68] — deferred, pre-existing
+- 符号链接/TOCTOU/目录/空文件/只读fs 等边界情况 — deferred, pre-existing

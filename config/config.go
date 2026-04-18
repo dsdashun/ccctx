@@ -74,7 +74,7 @@ auth_token = "your-auth-token-here"
 # model = "claude-3-5-sonnet-20241022"
 # small_fast_model = "claude-3-5-haiku-20241022"
 `
-		if err := os.WriteFile(configPath, []byte(defaultConfig), 0644); err != nil {
+		if err := os.WriteFile(configPath, []byte(defaultConfig), 0600); err != nil {
 			return nil, err
 		}
 	}
