@@ -23,7 +23,6 @@ var RunCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		var contextName string
 		if useTUI {
 			contexts, err := config.ListContexts()
 			if err != nil {
@@ -32,22 +31,19 @@ var RunCmd = &cobra.Command{
 			}
 
 			if len(contexts) == 0 {
-				fmt.Println("No contexts found.")
-				return
-			}
-
-			selected, selectorErr := ui.RunContextSelector()
-			if selectorErr != nil {
-				if selectorErr.Error() == "operation cancelled" {
-					fmt.Println("Operation cancelled.")
-					return
-				}
-				fmt.Fprintf(os.Stderr, "Error: %v\n", selectorErr)
+				fmt.Fprintf(os.Stderr, "Error: no contexts found\n")
 				os.Exit(1)
 			}
-			contextName = selected
-		} else {
-			contextName = provider
+
+			provider, err = ui.RunContextSelector()
+			if err != nil {
+				if err.Error() == "operation cancelled" {
+					fmt.Println("Operation cancelled.")
+					os.Exit(1)
+				}
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				os.Exit(1)
+			}
 		}
 
 		claudePath, err := exec.LookPath("claude")
@@ -59,7 +55,7 @@ var RunCmd = &cobra.Command{
 		target := append([]string{claudePath}, targetArgs...)
 
 		r, err := runner.New(runner.Options{
-			ContextName: contextName,
+			ContextName: provider,
 			Target:      target,
 		})
 		if err != nil {
@@ -69,11 +65,9 @@ var RunCmd = &cobra.Command{
 
 		exitCode, err := r.Run()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error executing claude: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
-		if exitCode != 0 {
-			os.Exit(exitCode)
-		}
+		os.Exit(exitCode)
 	},
 }
