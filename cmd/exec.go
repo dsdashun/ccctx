@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -32,9 +33,9 @@ var ExecCmd = &cobra.Command{
 				fmt.Fprintf(os.Stderr, "Error: no contexts found\n")
 				os.Exit(1)
 			}
-			provider, err = ui.RunContextSelector()
+			provider, err = ui.RunContextSelector(contexts)
 			if err != nil {
-				if err.Error() == "operation cancelled" {
+				if errors.Is(err, ui.ErrCancelled) {
 					fmt.Println("Operation cancelled.")
 					os.Exit(1)
 				}
