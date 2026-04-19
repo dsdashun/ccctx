@@ -3,6 +3,8 @@ package ui
 import (
 	"errors"
 	"fmt"
+	"runtime/debug"
+	"unicode/utf8"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -19,6 +21,12 @@ func RunContextSelector(contexts []string) (string, error) {
 }
 
 func runTviewSelector(contexts []string) (result string, err error) {
+	const (
+		minFlexWidth      = 30
+		maxFlexWidth      = 80
+		flexHeightPadding = 4 // title line (1) + top padding (1) + bottom padding (1) + buffer (1) = 4
+	)
+
 	var app *tview.Application
 
 	defer func() {
@@ -27,7 +35,7 @@ func runTviewSelector(contexts []string) (result string, err error) {
 				app.Stop()
 			}
 			result = ""
-			err = fmt.Errorf("TUI error: %v", r)
+			err = fmt.Errorf("TUI error: %v\nStack trace:\n%s", r, debug.Stack())
 		}
 	}()
 
@@ -50,7 +58,15 @@ func runTviewSelector(contexts []string) (result string, err error) {
 		AddItem(list, 0, 1, true)
 
 	maxItems := min(len(contexts), 10)
-	flex.SetRect(0, 1, 50, maxItems+4)
+
+	maxNameLen := 0
+	for _, ctx := range contexts {
+		if utf8.RuneCountInString(ctx) > maxNameLen {
+			maxNameLen = utf8.RuneCountInString(ctx)
+		}
+	}
+	flexWidth := min(max(maxNameLen+6, minFlexWidth), maxFlexWidth)
+	flex.SetRect(0, 1, flexWidth, maxItems+flexHeightPadding)
 
 	var selectedContext string
 
@@ -83,12 +99,13 @@ func runTviewSelector(contexts []string) (result string, err error) {
 		app.Stop()
 	})
 
-	list.SetSelectedFunc(func(index int, mainText string, secondaryText string, shortcut rune) {
-		selectedContext = mainText
+	list.SetSelectedFunc(func(index int, _ string, _ string, _ rune) {
+		selectedContext = contexts[index]
 		app.Stop()
 	})
 
 	if runErr := app.SetRoot(flex, false).SetFocus(list).Run(); runErr != nil {
+		app.Stop()
 		return "", runErr
 	}
 

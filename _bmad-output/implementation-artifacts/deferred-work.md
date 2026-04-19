@@ -28,9 +28,17 @@
 
 ## Deferred from: code review of 2-1-exec-command-integrates-tui-interactive-selector (2026-04-19)
 
-- Terminal may be left in raw mode if app.Run() returns error [internal/ui/selector.go:91] — deferred, pre-existing
-- Hardcoded flex width 50 truncates long context names [internal/ui/selector.go:53] — deferred, pre-existing
-- Magic number maxItems+4 in SetRect lacks explanation [internal/ui/selector.go:53] — deferred, pre-existing
-- Divergent selection sources between SetDoneFunc and SetSelectedFunc [internal/ui/selector.go:82,87] — deferred, pre-existing
-- Cancellation message goes to stdout instead of stderr [cmd/exec.go:39, cmd/run.go:42] — deferred, pre-existing
-- Panic recovery converts panic to plain error, losing stack trace [internal/ui/selector.go:24-32] — deferred, pre-existing
+- ~~Terminal may be left in raw mode if app.Run() returns error [internal/ui/selector.go:91]~~ — resolved by Story 2.2
+- ~~Hardcoded flex width 50 truncates long context names [internal/ui/selector.go:53]~~ — resolved by Story 2.2
+- ~~Magic number maxItems+4 in SetRect lacks explanation [internal/ui/selector.go:53]~~ — resolved by Story 2.2
+- ~~Divergent selection sources between SetDoneFunc and SetSelectedFunc [internal/ui/selector.go:82,87]~~ — resolved by Story 2.2
+- ~~Cancellation message goes to stdout instead of stderr [cmd/exec.go:39, cmd/run.go:42]~~ — resolved by Story 2.2
+- ~~Panic recovery converts panic to plain error, losing stack trace [internal/ui/selector.go:24-32]~~ — resolved by Story 2.2
+
+## Deferred from: code review of 2-2-tui-selector-cleanup-and-quality-improvements (2026-04-19)
+
+- maxItems 魔法数字 10 无解释 [internal/ui/selector.go:59] — deferred, pre-existing
+- SetRect Y 坐标硬编码为 1 无解释 [internal/ui/selector.go:68] — deferred, pre-existing
+- 缺少对新增代码路径的测试 [internal/ui/selector_test.go] — deferred, pre-existing
+- 空字符串上下文名被误认为取消 [internal/ui/selector.go] — deferred, pre-existing
+- flexHeightPadding 值与实际 tview 布局无验证 [internal/ui/selector.go:25] — deferred, pre-existing

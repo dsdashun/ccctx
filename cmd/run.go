@@ -39,7 +39,7 @@ var RunCmd = &cobra.Command{
 			provider, err = ui.RunContextSelector(contexts)
 			if err != nil {
 				if errors.Is(err, ui.ErrCancelled) {
-					fmt.Println("Operation cancelled.")
+					fmt.Fprintln(os.Stderr, "Operation cancelled.")
 					os.Exit(1)
 				}
 				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
