@@ -25,3 +25,12 @@
 
 - 非 "not exist" 的 `os.Stat` 错误被静默忽略 [config/config.go:68] — deferred, pre-existing
 - 符号链接/TOCTOU/目录/空文件/只读fs 等边界情况 — deferred, pre-existing
+
+## Deferred from: code review of 2-1-exec-command-integrates-tui-interactive-selector (2026-04-19)
+
+- Terminal may be left in raw mode if app.Run() returns error [internal/ui/selector.go:91] — deferred, pre-existing
+- Hardcoded flex width 50 truncates long context names [internal/ui/selector.go:53] — deferred, pre-existing
+- Magic number maxItems+4 in SetRect lacks explanation [internal/ui/selector.go:53] — deferred, pre-existing
+- Divergent selection sources between SetDoneFunc and SetSelectedFunc [internal/ui/selector.go:82,87] — deferred, pre-existing
+- Cancellation message goes to stdout instead of stderr [cmd/exec.go:39, cmd/run.go:42] — deferred, pre-existing
+- Panic recovery converts panic to plain error, losing stack trace [internal/ui/selector.go:24-32] — deferred, pre-existing

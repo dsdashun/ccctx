@@ -36,7 +36,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-18
-last_updated: 2026-04-19T12:00:00
+last_updated: 2026-04-19
 project: ccctx
 project_key: NOKEY
 tracking_system: file-system
@@ -44,7 +44,7 @@ story_location: _bmad-output/implementation-artifacts
 
 development_status:
   # Epic 1: Shared Execution Kernel & Flexible Provider Execution
-  epic-1: in-progress
+  epic-1: done
   1-1-extract-runner-struct-and-parseargs-into-internal-runner: done
   1-2-refactor-run-command-as-ultra-thin-wrapper: done
   1-3-implement-exec-subcommand-core-command: done
@@ -52,8 +52,8 @@ development_status:
   epic-1-retrospective: done
 
   # Epic 2: Interactive Provider Selection for All Commands
-  epic-2: backlog
-  2-1-exec-command-integrates-tui-interactive-selector: backlog
+  epic-2: in-progress
+  2-1-exec-command-integrates-tui-interactive-selector: done
   epic-2-retrospective: optional
 
   # Epic 3: Model Override Flags (Phase 2)
