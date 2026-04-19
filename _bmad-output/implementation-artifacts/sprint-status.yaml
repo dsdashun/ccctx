@@ -52,12 +52,19 @@ development_status:
   epic-1-retrospective: done
 
   # Epic 2: Interactive Provider Selection for All Commands
-  epic-2: in-progress
+  epic-2: done
   2-1-exec-command-integrates-tui-interactive-selector: done
   2-2-tui-selector-cleanup-and-quality-improvements: done
   epic-2-retrospective: done
 
   # Epic 3: Model Override Flags (Phase 2)
   epic-3: backlog
-  3-1-add-model-override-flags-to-run-and-exec: backlog
+  3-1-runner-and-command-layer-robustness: backlog
+  3-2-add-model-override-flags-to-run-and-exec: backlog
   epic-3-retrospective: optional
+
+  # Epic 4: Tech Debt & Code Quality
+  epic-4: backlog
+  4-1-config-loading-robustness: backlog
+  4-2-tui-selector-quality-polish: backlog
+  epic-4-retrospective: optional
