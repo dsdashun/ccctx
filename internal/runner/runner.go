@@ -89,11 +89,22 @@ func buildEnv(ctx *config.Context, opts Options) []string {
 	}
 	filtered = append(filtered, "ANTHROPIC_BASE_URL="+ctx.BaseURL)
 	filtered = append(filtered, "ANTHROPIC_AUTH_TOKEN="+ctx.AuthToken)
-	if ctx.Model != "" {
-		filtered = append(filtered, "ANTHROPIC_MODEL="+ctx.Model)
+
+	// Priority: CLI flag > config value > omit
+	model := opts.Model
+	if model == "" {
+		model = ctx.Model
 	}
-	if ctx.SmallFastModel != "" {
-		filtered = append(filtered, "ANTHROPIC_SMALL_FAST_MODEL="+ctx.SmallFastModel)
+	if model != "" {
+		filtered = append(filtered, "ANTHROPIC_MODEL="+model)
+	}
+
+	sfm := opts.SmallFastModel
+	if sfm == "" {
+		sfm = ctx.SmallFastModel
+	}
+	if sfm != "" {
+		filtered = append(filtered, "ANTHROPIC_SMALL_FAST_MODEL="+sfm)
 	}
 	return filtered
 }

@@ -82,6 +82,107 @@ func TestBuildEnv_InjectionOrder(t *testing.T) {
 	}
 }
 
+func TestBuildEnv_PriorityChain(t *testing.T) {
+	tests := []struct {
+		name      string
+		ctxModel  string
+		ctxSFM    string
+		optsModel string
+		optsSFM   string
+		wantModel string
+		wantSFM   string
+	}{
+		{
+			name:      "opts.Model set, ctx.Model empty → uses opts.Model",
+			ctxModel:  "",
+			optsModel: "claude-opus-4-7",
+			wantModel: "claude-opus-4-7",
+		},
+		{
+			name:      "opts.Model set, ctx.Model set → opts wins",
+			ctxModel:  "claude-sonnet-4-6",
+			optsModel: "claude-opus-4-7",
+			wantModel: "claude-opus-4-7",
+		},
+		{
+			name:      "opts.Model empty, ctx.Model set → uses ctx.Model",
+			ctxModel:  "claude-sonnet-4-6",
+			optsModel: "",
+			wantModel: "claude-sonnet-4-6",
+		},
+		{
+			name:      "both empty → no ANTHROPIC_MODEL",
+			ctxModel:  "",
+			optsModel: "",
+			wantModel: "",
+		},
+		{
+			name:    "opts.SFM set, ctx.SFM empty → uses opts.SFM",
+			ctxSFM:  "",
+			optsSFM: "claude-sonnet-4-6",
+			wantSFM: "claude-sonnet-4-6",
+		},
+		{
+			name:    "opts.SFM set, ctx.SFM set → opts wins",
+			ctxSFM:  "claude-haiku-4-5",
+			optsSFM: "claude-sonnet-4-6",
+			wantSFM: "claude-sonnet-4-6",
+		},
+		{
+			name:    "opts.SFM empty, ctx.SFM set → uses ctx.SFM",
+			ctxSFM:  "claude-haiku-4-5",
+			optsSFM: "",
+			wantSFM: "claude-haiku-4-5",
+		},
+		{
+			name:    "both SFM empty → no ANTHROPIC_SMALL_FAST_MODEL",
+			ctxSFM:  "",
+			optsSFM: "",
+			wantSFM: "",
+		},
+		{
+			name:      "mixed: opts.Model set, ctx.SFM set",
+			optsModel: "claude-opus-4-7",
+			ctxSFM:    "claude-haiku-4-5",
+			wantModel: "claude-opus-4-7",
+			wantSFM:   "claude-haiku-4-5",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := &config.Context{
+				BaseURL:        "https://api.example.com",
+				AuthToken:      "test-token",
+				Model:          tt.ctxModel,
+				SmallFastModel: tt.ctxSFM,
+			}
+			opts := Options{
+				Model:          tt.optsModel,
+				SmallFastModel: tt.optsSFM,
+			}
+
+			env := buildEnv(ctx, opts)
+
+			if tt.wantModel != "" {
+				assertEnvContains(t, env, "ANTHROPIC_MODEL="+tt.wantModel)
+			} else {
+				for _, e := range env {
+					assert.False(t, strings.HasPrefix(e, "ANTHROPIC_MODEL="), "expected no ANTHROPIC_MODEL, got %q", e)
+				}
+			}
+
+			if tt.wantSFM != "" {
+				assertEnvContains(t, env, "ANTHROPIC_SMALL_FAST_MODEL="+tt.wantSFM)
+			} else {
+				for _, e := range env {
+					assert.False(t, strings.HasPrefix(e, "ANTHROPIC_SMALL_FAST_MODEL="), "expected no ANTHROPIC_SMALL_FAST_MODEL, got %q", e)
+				}
+			}
+		})
+	}
+}
+
 func TestValidateURL(t *testing.T) {
 	tests := []struct {
 		name    string

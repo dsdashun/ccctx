@@ -13,16 +13,29 @@ import (
 )
 
 var RunCmd = &cobra.Command{
-	Use:   "run [context] [-- claude-args...]",
-	Short: "Run claude with a context",
-	Long:  "Run claude with the specified context or interactively select one. Arguments after '--' are passed to claude.",
-	Args:  cobra.ArbitraryArgs,
+	Use:                "run [context] [-- claude-args...]",
+	Short:              "Run claude with a context",
+	Long:               "Run claude with the specified context or interactively select one. Arguments after '--' are passed to claude.",
+	Args:               cobra.ArbitraryArgs,
+	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
+		if runner.WantsHelp(args) {
+			if err := cmd.Help(); err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			}
+			return
+		}
 		os.Exit(runRun(args))
 	},
 }
 
 func runRun(args []string) int {
+	model, smallFastModel, args, err := runner.ExtractFlags(args)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		return 1
+	}
+
 	provider, targetArgs, useTUI, err := runner.ParseArgs(args)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -61,8 +74,10 @@ func runRun(args []string) int {
 	target := append([]string{claudePath}, targetArgs...)
 
 	r, err := runner.New(runner.Options{
-		ContextName: provider,
-		Target:      target,
+		ContextName:    provider,
+		Target:         target,
+		Model:          model,
+		SmallFastModel: smallFastModel,
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
