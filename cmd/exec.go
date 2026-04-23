@@ -12,16 +12,29 @@ import (
 )
 
 var ExecCmd = &cobra.Command{
-	Use:   "exec [context] [-- command...]",
-	Short: "Execute a command or launch a shell with a context",
-	Long:  "Execute a command or launch a shell with the specified context. If no command is given, launches $SHELL. If no context is given, opens the interactive selector.",
-	Args:  cobra.ArbitraryArgs,
+	Use:                "exec [context] [-- command...]",
+	Short:              "Execute a command or launch a shell with a context",
+	Long:               "Execute a command or launch a shell with the specified context. If no command is given, launches $SHELL. If no context is given, opens the interactive selector.",
+	Args:               cobra.ArbitraryArgs,
+	DisableFlagParsing: true,
 	Run: func(cmd *cobra.Command, args []string) {
+		if runner.WantsHelp(args) {
+			if err := cmd.Help(); err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			}
+			return
+		}
 		os.Exit(execRun(args))
 	},
 }
 
 func execRun(args []string) int {
+	model, smallFastModel, args, err := runner.ExtractFlags(args)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		return 1
+	}
+
 	provider, targetArgs, useTUI, err := runner.ParseArgs(args)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -58,7 +71,7 @@ func execRun(args []string) int {
 		targetArgs = []string{shell}
 	}
 
-	opts := runner.Options{ContextName: provider, Target: targetArgs}
+	opts := runner.Options{ContextName: provider, Target: targetArgs, Model: model, SmallFastModel: smallFastModel}
 	r, err := runner.New(opts)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
