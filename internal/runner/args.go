@@ -1,6 +1,9 @@
 package runner
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // ParseArgs parses command arguments in a command-agnostic way.
 // It returns the provider name, forwarded target arguments, whether TUI should be used,
@@ -22,6 +25,9 @@ func ParseArgs(args []string) (provider string, targetArgs []string, useTUI bool
 			return "", nil, false, fmt.Errorf("at most one argument allowed before --")
 		}
 		if len(contextArgs) == 1 {
+			if strings.HasPrefix(contextArgs[0], "-") {
+				return "", nil, false, fmt.Errorf("flag-like argument '%s' not allowed in provider position", contextArgs[0])
+			}
 			return contextArgs[0], targetArgs, false, nil
 		}
 		return "", targetArgs, true, nil
@@ -31,5 +37,8 @@ func ParseArgs(args []string) (provider string, targetArgs []string, useTUI bool
 		return "", []string{}, true, nil
 	}
 
+	if strings.HasPrefix(args[0], "-") {
+		return "", nil, false, fmt.Errorf("flag-like argument '%s' not allowed in provider position", args[0])
+	}
 	return args[0], args[1:], false, nil
 }

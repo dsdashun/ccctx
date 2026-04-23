@@ -1,5 +1,5 @@
 # generated: 2026-04-18
-# last_updated: 2026-04-19
+# last_updated: 2026-04-23
 
 # project: ccctx
 # project_key: NOKEY
@@ -36,7 +36,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-18
-last_updated: 2026-04-19
+last_updated: 2026-04-23
 project: ccctx
 project_key: NOKEY
 tracking_system: file-system
@@ -58,8 +58,8 @@ development_status:
   epic-2-retrospective: done
 
   # Epic 3: Model Override Flags (Phase 2)
-  epic-3: backlog
-  3-1-runner-and-command-layer-robustness: backlog
+  epic-3: in-progress
+  3-1-runner-and-command-layer-robustness: done
   3-2-add-model-override-flags-to-run-and-exec: backlog
   epic-3-retrospective: optional
 

@@ -18,57 +18,61 @@ var RunCmd = &cobra.Command{
 	Long:  "Run claude with the specified context or interactively select one. Arguments after '--' are passed to claude.",
 	Args:  cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		provider, targetArgs, useTUI, err := runner.ParseArgs(args)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
-		if useTUI {
-			contexts, err := config.ListContexts()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-				os.Exit(1)
-			}
-
-			if len(contexts) == 0 {
-				fmt.Fprintf(os.Stderr, "Error: no contexts found\n")
-				os.Exit(1)
-			}
-
-			provider, err = ui.RunContextSelector(contexts)
-			if err != nil {
-				if errors.Is(err, ui.ErrCancelled) {
-					fmt.Fprintln(os.Stderr, "Operation cancelled.")
-					os.Exit(1)
-				}
-				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-				os.Exit(1)
-			}
-		}
-
-		claudePath, err := exec.LookPath("claude")
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: claude not found in PATH\n")
-			os.Exit(1)
-		}
-
-		target := append([]string{claudePath}, targetArgs...)
-
-		r, err := runner.New(runner.Options{
-			ContextName: provider,
-			Target:      target,
-		})
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
-		exitCode, err := r.Run()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-		os.Exit(exitCode)
+		os.Exit(runRun(args))
 	},
+}
+
+func runRun(args []string) int {
+	provider, targetArgs, useTUI, err := runner.ParseArgs(args)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		return 1
+	}
+
+	if useTUI {
+		contexts, err := config.ListContexts()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			return 1
+		}
+
+		if len(contexts) == 0 {
+			fmt.Fprintf(os.Stderr, "Error: no contexts found\n")
+			return 1
+		}
+
+		provider, err = ui.RunContextSelector(contexts)
+		if err != nil {
+			if errors.Is(err, ui.ErrCancelled) {
+				fmt.Fprintln(os.Stderr, "Operation cancelled.")
+				return 1
+			}
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			return 1
+		}
+	}
+
+	claudePath, err := exec.LookPath("claude")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: claude not found in PATH\n")
+		return 1
+	}
+
+	target := append([]string{claudePath}, targetArgs...)
+
+	r, err := runner.New(runner.Options{
+		ContextName: provider,
+		Target:      target,
+	})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		return 1
+	}
+
+	exitCode, err := r.Run()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		return 1
+	}
+	return exitCode
 }
