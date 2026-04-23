@@ -42,3 +42,13 @@
 - ~~缺少对新增代码路径的测试 [internal/ui/selector_test.go]~~ — promoted to Story 4.2
 - ~~空字符串上下文名被误认为取消 [internal/ui/selector.go]~~ — promoted to Story 4.2
 - ~~flexHeightPadding 值与实际 tview 布局无验证 [internal/ui/selector.go:25]~~ — promoted to Story 4.2
+
+## Deferred from: code review of 3-1-runner-and-command-layer-robustness (2026-04-23)
+
+- 跨平台兼容性：Windows 上假 claude 脚本使用 shebang 不工作 [cmd/run_test.go]
+- buildEnv 不验证注入环境变量值中的换行或空字节 [internal/runner/runner.go:82-99]
+- config 对 base_url 不支持 env: 前缀解析（与 auth_token 不一致）[config/config.go]
+- SHELL 环境变量可执行性未验证 [cmd/exec.go:52-58]
+- 目标命令被信号终止时退出码丢失 [internal/runner/runner.go:64-80]
+- 空 provider 名未在 ParseArgs 中显式拒绝 [internal/runner/args.go]
+- 通用 "Error: %v" 消息模式不利于程序化错误区分 [cmd/run.go, cmd/exec.go]

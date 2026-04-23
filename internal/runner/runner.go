@@ -3,6 +3,7 @@ package runner
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"os/exec"
 	"strings"
@@ -31,6 +32,9 @@ func New(opts Options) (*Runner, error) {
 	if ctx.BaseURL == "" {
 		return nil, fmt.Errorf("context '%s' is missing base_url", opts.ContextName)
 	}
+	if err := validateURL(ctx.BaseURL); err != nil {
+		return nil, fmt.Errorf("context '%s': %w", opts.ContextName, err)
+	}
 	if ctx.AuthToken == "" {
 		return nil, fmt.Errorf("context '%s' is missing auth_token", opts.ContextName)
 	}
@@ -41,6 +45,22 @@ func New(opts Options) (*Runner, error) {
 	return &Runner{ctx: ctx, opts: opts, env: env}, nil
 }
 
+func validateURL(rawURL string) error {
+	if strings.Contains(rawURL, " ") {
+		return fmt.Errorf("invalid base_url: contains spaces")
+	}
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return fmt.Errorf("invalid base_url: %w", err)
+	}
+	if u.Scheme == "" {
+		return fmt.Errorf("invalid base_url: missing scheme (e.g., https://)")
+	}
+	return nil
+}
+
+// Run executes the target command. Returns (0, nil) on success, (exitCode, nil) for
+// command exit errors, (1, error) for start failures. Caller is responsible for printing errors.
 func (r *Runner) Run() (int, error) {
 	cmd := exec.Command(r.opts.Target[0], r.opts.Target[1:]...)
 	cmd.Env = r.env

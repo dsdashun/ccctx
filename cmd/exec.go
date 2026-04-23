@@ -17,54 +17,58 @@ var ExecCmd = &cobra.Command{
 	Long:  "Execute a command or launch a shell with the specified context. If no command is given, launches $SHELL. If no context is given, opens the interactive selector.",
 	Args:  cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		provider, targetArgs, useTUI, err := runner.ParseArgs(args)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
-		if useTUI {
-			contexts, err := config.ListContexts()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-				os.Exit(1)
-			}
-			if len(contexts) == 0 {
-				fmt.Fprintf(os.Stderr, "Error: no contexts found\n")
-				os.Exit(1)
-			}
-			provider, err = ui.RunContextSelector(contexts)
-			if err != nil {
-				if errors.Is(err, ui.ErrCancelled) {
-					fmt.Fprintln(os.Stderr, "Operation cancelled.")
-					os.Exit(1)
-				}
-				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-				os.Exit(1)
-			}
-		}
-
-		if len(targetArgs) == 0 {
-			shell := os.Getenv("SHELL")
-			if shell == "" {
-				fmt.Fprintf(os.Stderr, "Error: SHELL environment variable not set\n")
-				os.Exit(1)
-			}
-			targetArgs = []string{shell}
-		}
-
-		opts := runner.Options{ContextName: provider, Target: targetArgs}
-		r, err := runner.New(opts)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-
-		exitCode, err := r.Run()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-		os.Exit(exitCode)
+		os.Exit(execRun(args))
 	},
+}
+
+func execRun(args []string) int {
+	provider, targetArgs, useTUI, err := runner.ParseArgs(args)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		return 1
+	}
+
+	if useTUI {
+		contexts, err := config.ListContexts()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			return 1
+		}
+		if len(contexts) == 0 {
+			fmt.Fprintf(os.Stderr, "Error: no contexts found\n")
+			return 1
+		}
+		provider, err = ui.RunContextSelector(contexts)
+		if err != nil {
+			if errors.Is(err, ui.ErrCancelled) {
+				fmt.Fprintln(os.Stderr, "Operation cancelled.")
+				return 1
+			}
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			return 1
+		}
+	}
+
+	if len(targetArgs) == 0 {
+		shell := os.Getenv("SHELL")
+		if shell == "" {
+			fmt.Fprintf(os.Stderr, "Error: SHELL environment variable not set\n")
+			return 1
+		}
+		targetArgs = []string{shell}
+	}
+
+	opts := runner.Options{ContextName: provider, Target: targetArgs}
+	r, err := runner.New(opts)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		return 1
+	}
+
+	exitCode, err := r.Run()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		return 1
+	}
+	return exitCode
 }

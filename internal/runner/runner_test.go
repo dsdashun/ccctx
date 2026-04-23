@@ -6,6 +6,7 @@ import (
 
 	"github.com/dsdashun/ccctx/config"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBuildEnv(t *testing.T) {
@@ -78,6 +79,58 @@ func TestBuildEnv_InjectionOrder(t *testing.T) {
 		assert.GreaterOrEqual(t, idx, 0, "expected to find %s in env", prefix)
 		assert.GreaterOrEqual(t, idx, lastIdx, "%s should appear after previous injection", prefix)
 		lastIdx = idx
+	}
+}
+
+func TestValidateURL(t *testing.T) {
+	tests := []struct {
+		name    string
+		rawURL  string
+		wantErr string
+	}{
+		{
+			name:   "valid https URL",
+			rawURL: "https://api.example.com",
+		},
+		{
+			name:   "valid http URL",
+			rawURL: "http://localhost:8080",
+		},
+		{
+			name:    "missing scheme",
+			rawURL:  "api.example.com",
+			wantErr: "missing scheme",
+		},
+		{
+			name:    "contains spaces",
+			rawURL:  "https://api example.com",
+			wantErr: "contains spaces",
+		},
+		{
+			name:    "empty string",
+			rawURL:  "",
+			wantErr: "missing scheme",
+		},
+		{
+			name:   "valid URL with path",
+			rawURL: "https://api.example.com/v1",
+		},
+		{
+			name:   "valid URL with port",
+			rawURL: "https://api.example.com:8443",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateURL(tt.rawURL)
+			if tt.wantErr != "" {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tt.wantErr)
+				return
+			}
+			require.NoError(t, err)
+		})
 	}
 }
 

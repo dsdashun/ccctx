@@ -73,6 +73,30 @@ func TestParseArgs(t *testing.T) {
 			wantTargetArgs: []string{},
 			wantUseTUI:     true,
 		},
+		{
+			name:           "flag-like double dash in provider position",
+			args:           []string{"--model", "foo"},
+			wantProvider:   "",
+			wantTargetArgs: nil,
+			wantUseTUI:     false,
+			wantErr:        "flag-like argument '--model'",
+		},
+		{
+			name:           "flag-like single dash in provider position",
+			args:           []string{"-m"},
+			wantProvider:   "",
+			wantTargetArgs: nil,
+			wantUseTUI:     false,
+			wantErr:        "flag-like argument '-m'",
+		},
+		{
+			name:           "flag-like arg before separator",
+			args:           []string{"--model", "--", "foo"},
+			wantProvider:   "",
+			wantTargetArgs: nil,
+			wantUseTUI:     false,
+			wantErr:        "flag-like argument '--model'",
+		},
 	}
 
 	for _, tt := range tests {
