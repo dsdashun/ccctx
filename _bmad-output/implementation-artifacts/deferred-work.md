@@ -52,3 +52,8 @@
 - 目标命令被信号终止时退出码丢失 [internal/runner/runner.go:64-80]
 - 空 provider 名未在 ParseArgs 中显式拒绝 [internal/runner/args.go]
 - 通用 "Error: %v" 消息模式不利于程序化错误区分 [cmd/run.go, cmd/exec.go]
+
+## Deferred from: code review of 3-2-add-model-override-flags-to-run-and-exec (2026-04-23)
+
+- `claude` 二进制存在但不可执行时，`exec.LookPath` 成功但 `exec.Command` 会失败 [cmd/run.go:66-70]
+- `SHELL` 环境变量设为空字符串时会被当作目标命令传递 [cmd/exec.go:63-70]
