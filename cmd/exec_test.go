@@ -59,7 +59,7 @@ func TestExecRun_ModelFlags(t *testing.T) {
 			wantModel: "claude-opus-4-7",
 		},
 		{
-			name: "--small-fast-model flag sets ANTHROPIC_SMALL_FAST_MODEL via shell",
+			name: "--small-fast-model flag sets ANTHROPIC_DEFAULT_HAIKU_MODEL via shell",
 			args: []string{"--small-fast-model", "claude-sonnet-4-6", "test"},
 			configTOML: `[context.test]
 	base_url = "https://api.example.com"
@@ -93,7 +93,7 @@ func TestExecRun_ModelFlags(t *testing.T) {
 			t.Setenv("MOCK_OUTPUT_FILE", outputFile)
 
 			mockDir := t.TempDir()
-			mockScript := []byte("#!/bin/sh\necho \"$ANTHROPIC_MODEL\" > \"$MOCK_OUTPUT_FILE\"\necho \"$ANTHROPIC_SMALL_FAST_MODEL\" >> \"$MOCK_OUTPUT_FILE\"\nexit 0")
+			mockScript := []byte("#!/bin/sh\necho \"$ANTHROPIC_MODEL\" > \"$MOCK_OUTPUT_FILE\"\necho \"$ANTHROPIC_DEFAULT_HAIKU_MODEL\" >> \"$MOCK_OUTPUT_FILE\"\nexit 0")
 
 			// Determine mock name based on whether args include explicit target after --
 			hasExplicitTarget := false
@@ -135,7 +135,7 @@ func TestExecRun_ModelFlags(t *testing.T) {
 					assert.Equal(t, tt.wantModel, lines[0])
 				}
 				if tt.wantSFM != "" {
-					require.GreaterOrEqual(t, len(lines), 2, "mock did not write ANTHROPIC_SMALL_FAST_MODEL")
+					require.GreaterOrEqual(t, len(lines), 2, "mock did not write ANTHROPIC_DEFAULT_HAIKU_MODEL")
 					assert.Equal(t, tt.wantSFM, lines[1])
 				}
 			}

@@ -14,6 +14,9 @@ type Context struct {
 	AuthToken      string `mapstructure:"auth_token"`
 	Model          string `mapstructure:"model"`
 	SmallFastModel string `mapstructure:"small_fast_model"`
+	HaikuModel     string `mapstructure:"haiku_model"`
+	SonnetModel    string `mapstructure:"sonnet_model"`
+	OpusModel      string `mapstructure:"opus_model"`
 }
 
 type Config struct {
@@ -70,9 +73,12 @@ func LoadConfig() (*Config, error) {
 [context.example]
 base_url = "https://api.anthropic.com"
 auth_token = "your-auth-token-here"
-# Optional: specify model explicitly
-# model = "claude-3-5-sonnet-20241022"
-# small_fast_model = "claude-3-5-haiku-20241022"
+# Optional: specify models explicitly
+# model = "claude-sonnet-4-6"
+# haiku_model = "claude-haiku-4-5-20251001"
+# sonnet_model = "claude-sonnet-4-6"
+# opus_model = "claude-opus-4-7"
+# small_fast_model = "claude-haiku-4-5-20251001"  # deprecated: use haiku_model instead
 `
 		if err := os.WriteFile(configPath, []byte(defaultConfig), 0600); err != nil {
 			return nil, err
@@ -130,6 +136,9 @@ func GetContext(name string) (*Context, error) {
 		AuthToken:      resolvedAuthToken,
 		Model:          context.Model,
 		SmallFastModel: context.SmallFastModel,
+		HaikuModel:     context.HaikuModel,
+		SonnetModel:    context.SonnetModel,
+		OpusModel:      context.OpusModel,
 	}
 
 	return &resolvedContext, nil
