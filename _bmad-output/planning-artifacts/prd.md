@@ -213,8 +213,11 @@ ccctx is a Go CLI tool for Claude Code users who frequently switch between diffe
 [context.<name>]
 base_url = "https://..."           # Required
 auth_token = "token" or "env:VAR"  # Required, supports env: prefix
-model = "claude-..."               # Optional
-small_fast_model = "claude-..."    # Optional
+model = "claude-..."               # Optional — sets ANTHROPIC_MODEL
+haiku_model = "claude-..."         # Optional — sets ANTHROPIC_DEFAULT_HAIKU_MODEL
+sonnet_model = "claude-..."        # Optional — sets ANTHROPIC_DEFAULT_SONNET_MODEL
+opus_model = "claude-..."          # Optional — sets ANTHROPIC_DEFAULT_OPUS_MODEL
+small_fast_model = "claude-..."    # Optional (deprecated) — alias for haiku_model, sets ANTHROPIC_DEFAULT_HAIKU_MODEL
 ```
 
 - Config path: `~/.ccctx/config.toml` (overridable via `CCCTX_CONFIG_PATH`)
@@ -234,7 +237,7 @@ small_fast_model = "claude-..."    # Optional
 ### Context Configuration
 
 - FR1: Users can define multiple named provider contexts in a TOML configuration file, each with `base_url` and `auth_token` fields
-- FR2: Users can optionally specify `model` and `small_fast_model` per context to override default model selection
+- FR2: Users can optionally specify `model`, `haiku_model`, `sonnet_model`, and `opus_model` per context to override default model selection. The `small_fast_model` field is retained for backward compatibility — when set, it maps to `ANTHROPIC_DEFAULT_HAIKU_MODEL` (the deprecated `ANTHROPIC_SMALL_FAST_MODEL` is no longer injected).
 - FR3: Users can reference environment variables in `auth_token` using the `env:` prefix for secure token resolution
 - FR4: The system auto-creates the config directory and example configuration file when none exists
 - FR5: Users can override the default config path (`~/.ccctx/config.toml`) via the `CCCTX_CONFIG_PATH` environment variable
@@ -248,7 +251,7 @@ small_fast_model = "claude-..."    # Optional
 
 - FR8: Users can run Claude Code with a specified provider context via `ccctx run <provider>`
 - FR9: Users can forward additional arguments to Claude Code using the `--` separator
-- FR10: The system injects the provider's `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`, and optional model env vars into the Claude process
+- FR10: The system injects the provider's `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`, and optional model env vars (`ANTHROPIC_MODEL`, `ANTHROPIC_DEFAULT_HAIKU_MODEL`, `ANTHROPIC_DEFAULT_SONNET_MODEL`, `ANTHROPIC_DEFAULT_OPUS_MODEL`) into the Claude process
 - FR11: The system strips any pre-existing `ANTHROPIC_*` environment variables before injecting provider-specific values
 - FR12: The system propagates Claude's exit code back to the caller
 
@@ -277,8 +280,8 @@ small_fast_model = "claude-..."    # Optional
 
 ### Config-Level Parameter Overrides (Phase 2)
 
-- FR27: Users can override the provider's configured model via `--model <value>` flag on both `run` and `exec` commands
-- FR28: The system applies CLI flag values with higher priority than config file values, allowing temporary overrides without modifying the config
+- FR27: Users can override the provider's configured model via `--model`, `--haiku-model`, `--sonnet-model`, and `--opus-model` flags on both `run` and `exec` commands. The `--small-fast-model` flag is retained as an alias for `--haiku-model` for backward compatibility.
+- FR28: For each model variable (`model`, `haiku_model`, `sonnet_model`, `opus_model`), the system applies CLI flag values with higher priority than config file values, allowing temporary overrides without modifying the config. When `--small-fast-model` is used, it sets `ANTHROPIC_DEFAULT_HAIKU_MODEL` (equivalent to `--haiku-model`).
 
 ## Non-Functional Requirements
 

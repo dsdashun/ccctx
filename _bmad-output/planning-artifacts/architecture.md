@@ -158,10 +158,12 @@ Rather than a starter template, the architecture extends the existing codebase:
 package runner
 
 type Options struct {
-    ContextName    string   // resolved provider name
-    Target         []string // command to execute (["claude"] for run, user-specified for exec)
-    Model          string   // optional override (Phase 2)
-    SmallFastModel string   // optional override (Phase 2)
+    ContextName string   // resolved provider name
+    Target      []string // command to execute (["claude"] for run, user-specified for exec)
+    Model       string   // optional override — sets ANTHROPIC_MODEL
+    HaikuModel  string   // optional override — sets ANTHROPIC_DEFAULT_HAIKU_MODEL
+    SonnetModel string   // optional override — sets ANTHROPIC_DEFAULT_SONNET_MODEL
+    OpusModel   string   // optional override — sets ANTHROPIC_DEFAULT_OPUS_MODEL
 }
 
 type Runner struct {
@@ -328,6 +330,21 @@ func ParseArgs(args []string) (provider string, targetArgs []string, useTUI bool
 
 ### Argument Parsing Patterns
 
+**ExtractFlags signature:**
+```go
+func ExtractFlags(args []string) (model, haikuModel, sonnetModel, opusModel string, remaining []string, err error)
+```
+
+**Flag extraction:**
+
+| Flag | Maps to | Notes |
+|------|---------|-------|
+| `--model` | `model` | Unchanged |
+| `--haiku-model` | `haikuModel` | New |
+| `--sonnet-model` | `sonnetModel` | New |
+| `--opus-model` | `opusModel` | New |
+| `--small-fast-model` | `haikuModel` | Alias for `--haiku-model`; silently ignored if `--haiku-model` also present |
+
 **ParseArgs signature:**
 ```go
 func ParseArgs(args []string) (provider string, targetArgs []string, useTUI bool, err error)
@@ -366,14 +383,18 @@ func ParseArgs(args []string) (provider string, targetArgs []string, useTUI bool
 1. `ANTHROPIC_BASE_URL` — required (guaranteed non-empty by New() validation)
 2. `ANTHROPIC_AUTH_TOKEN` — required (guaranteed non-empty by New() validation)
 3. `ANTHROPIC_MODEL` — optional, only if non-empty
-4. `ANTHROPIC_SMALL_FAST_MODEL` — optional, only if non-empty
+4. `ANTHROPIC_DEFAULT_HAIKU_MODEL` — optional, only if non-empty
+5. `ANTHROPIC_DEFAULT_SONNET_MODEL` — optional, only if non-empty
+6. `ANTHROPIC_DEFAULT_OPUS_MODEL` — optional, only if non-empty
 
-**Empty value rule:** Never inject env vars with empty values. Check `!= ""` before appending. Required fields are enforced at the validation layer, not the injection layer.
+**Empty value rule:** Never inject env vars with empty values. Check `!= ""` before appending. Required fields are enforced at the validation layer, not the injection layer. `ANTHROPIC_SMALL_FAST_MODEL` is no longer injected — `ANTHROPIC_DEFAULT_HAIKU_MODEL` supersedes it.
 
-**Model priority (Phase 2 ready):**
+**Model priority:**
 ```
 ANTHROPIC_MODEL: Options.Model > ctx.Model > omit
-ANTHROPIC_SMALL_FAST_MODEL: Options.SmallFastModel > ctx.SmallFastModel > omit
+ANTHROPIC_DEFAULT_HAIKU_MODEL: Options.HaikuModel > ctx.HaikuModel > ctx.SmallFastModel > omit
+ANTHROPIC_DEFAULT_SONNET_MODEL: Options.SonnetModel > ctx.SonnetModel > omit
+ANTHROPIC_DEFAULT_OPUS_MODEL: Options.OpusModel > ctx.OpusModel > omit
 ```
 If the higher-priority source is non-empty, use it. If empty, fall through to the next source. If all are empty, don't inject the variable at all.
 
@@ -395,6 +416,12 @@ var ExecCmd = &cobra.Command{
     Short: "...",
     Args:  cobra.ArbitraryArgs,
     Run: func(cmd *cobra.Command, args []string) {
+        if runner.WantsHelp(args) {
+            cmd.Help(); os.Exit(0)
+        }
+        model, haikuModel, sonnetModel, opusModel, args, err := runner.ExtractFlags(args)
+        if err != nil { fmt.Fprintf(os.Stderr, "Error: %v\n", err); os.Exit(1) }
+
         provider, targetArgs, useTUI, err := runner.ParseArgs(args)
         if err != nil { fmt.Fprintf(os.Stderr, "Error: %v\n", err); os.Exit(1) }
 
@@ -425,7 +452,10 @@ var ExecCmd = &cobra.Command{
             targetArgs = []string{shell}
         }
 
-        opts := runner.Options{ContextName: provider, Target: targetArgs}
+        opts := runner.Options{
+            ContextName: provider, Target: targetArgs,
+            Model: model, HaikuModel: haikuModel, SonnetModel: sonnetModel, OpusModel: opusModel,
+        }
         r, err := runner.New(opts)
         if err != nil { fmt.Fprintf(os.Stderr, "Error: %v\n", err); os.Exit(1) }
 
@@ -443,6 +473,12 @@ var RunCmd = &cobra.Command{
     Short: "...",
     Args:  cobra.ArbitraryArgs,
     Run: func(cmd *cobra.Command, args []string) {
+        if runner.WantsHelp(args) {
+            cmd.Help(); os.Exit(0)
+        }
+        model, haikuModel, sonnetModel, opusModel, args, err := runner.ExtractFlags(args)
+        if err != nil { fmt.Fprintf(os.Stderr, "Error: %v\n", err); os.Exit(1) }
+
         provider, targetArgs, useTUI, err := runner.ParseArgs(args)
         if err != nil { fmt.Fprintf(os.Stderr, "Error: %v\n", err); os.Exit(1) }
 
@@ -473,7 +509,10 @@ var RunCmd = &cobra.Command{
             targetArgs = append([]string{claudePath}, targetArgs...)
         }
 
-        opts := runner.Options{ContextName: provider, Target: targetArgs}
+        opts := runner.Options{
+            ContextName: provider, Target: targetArgs,
+            Model: model, HaikuModel: haikuModel, SonnetModel: sonnetModel, OpusModel: opusModel,
+        }
         r, err := runner.New(opts)
         if err != nil { fmt.Fprintf(os.Stderr, "Error: %v\n", err); os.Exit(1) }
 
@@ -606,6 +645,13 @@ ccctx/
 |-------|--------------|--------|
 | 3.1 --model flags | `internal/runner/runner.go`, `cmd/exec.go`, `cmd/run.go` | MODIFY — add flag support |
 
+**Epic 4: Claude Code Model Environment Variable Update**
+
+| Story | Files Changed | Action |
+|-------|--------------|--------|
+| 4.1 Config & Runner field expansion | `config/config.go`, `internal/runner/runner.go`, tests | MODIFY — add haiku/sonnet/opus fields + new env var injection |
+| 4.2 CLI flag extension | `internal/runner/args.go`, `cmd/run.go`, `cmd/exec.go`, tests | MODIFY — add --haiku-model/--sonnet-model/--opus-model flags |
+
 **Cross-Cutting:**
 
 | Concern | Location | Notes |
@@ -692,7 +738,7 @@ cmd/exec.go (CORE)                    cmd/run.go (WRAPPER)
 - FR17: Exit code passthrough via `(int, error)` return — start failures are reported
 - FR19, FR23: TUI selector reuse confirmed via useTUI flag
 - FR24-FR26: Shared pipeline architecture via internal/runner/
-- FR27-FR28: Deferred to Phase 2 (Options struct has Model/SmallFastModel fields ready; `--` separator conflict noted for Phase 2 resolution)
+- FR27-FR28: Complete — Model flags implemented in Epic 3. Updated in Epic 4 to include `--haiku-model`, `--sonnet-model`, `--opus-model` flags with `--small-fast-model` as backward-compatible alias for `--haiku-model`.
 
 **Non-Functional Requirements:**
 - NFR1-NFR3: Unchanged, runner doesn't leak tokens

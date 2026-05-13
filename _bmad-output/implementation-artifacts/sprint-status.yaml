@@ -63,8 +63,14 @@ development_status:
   3-2-add-model-override-flags-to-run-and-exec: done
   epic-3-retrospective: done
 
-  # Epic 4: Tech Debt & Code Quality
+  # Epic 4: Claude Code Model Environment Variable Update
   epic-4: backlog
-  4-1-config-loading-robustness: backlog
-  4-2-tui-selector-quality-polish: backlog
+  4-1-config-runner-model-field-expansion: backlog
+  4-2-cli-flag-extension-backward-compatibility: backlog
   epic-4-retrospective: optional
+
+  # Epic 5: Tech Debt & Code Quality
+  epic-5: backlog
+  5-1-config-loading-robustness: backlog
+  5-2-tui-selector-quality-polish: backlog
+  epic-5-retrospective: optional
