@@ -1,5 +1,5 @@
 # generated: 2026-05-13
-# last_updated: 2026-05-13
+# last_updated: 2026-05-13 (epic-4 retro completed)
 # project: ccctx
 # project_key: NOKEY
 # tracking_system: file-system
@@ -63,11 +63,11 @@ development_status:
   epic-3-retrospective: done
 
   # Epic 4: Claude Code Model Environment Variable Update
-  epic-4: in-progress
+  epic-4: done
   4-1-config-runner-model-field-expansion: done
   4-2-cli-flag-extension-backward-compatibility: done
   4-3-test-quality-and-error-message-improvements: done
-  epic-4-retrospective: optional
+  epic-4-retrospective: done
 
   # Epic 5: Tech Debt & Code Quality
   epic-5: backlog
