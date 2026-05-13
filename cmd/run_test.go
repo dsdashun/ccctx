@@ -214,7 +214,7 @@ func TestRunRun_ModelFlags(t *testing.T) {
 
 			mockDir := t.TempDir()
 			claudePath := filepath.Join(mockDir, "claude")
-			err = os.WriteFile(claudePath, []byte("#!/bin/sh\necho \"$ANTHROPIC_MODEL\" > \"$MOCK_OUTPUT_FILE\"\necho \"$ANTHROPIC_SMALL_FAST_MODEL\" >> \"$MOCK_OUTPUT_FILE\"\nexit 0"), 0755)
+			err = os.WriteFile(claudePath, []byte("#!/bin/sh\necho \"$ANTHROPIC_MODEL\" > \"$MOCK_OUTPUT_FILE\"\necho \"$ANTHROPIC_DEFAULT_HAIKU_MODEL\" >> \"$MOCK_OUTPUT_FILE\"\nexit 0"), 0755)
 			require.NoError(t, err)
 			t.Setenv("PATH", mockDir)
 
@@ -230,7 +230,7 @@ func TestRunRun_ModelFlags(t *testing.T) {
 					assert.Equal(t, tt.wantModel, lines[0])
 				}
 				if tt.wantSFM != "" {
-					require.GreaterOrEqual(t, len(lines), 2, "mock did not write ANTHROPIC_SMALL_FAST_MODEL")
+					require.GreaterOrEqual(t, len(lines), 2, "mock did not write ANTHROPIC_DEFAULT_HAIKU_MODEL")
 					assert.Equal(t, tt.wantSFM, lines[1])
 				}
 			}

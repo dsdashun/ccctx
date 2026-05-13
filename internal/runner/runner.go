@@ -16,6 +16,9 @@ type Options struct {
 	Target         []string
 	Model          string
 	SmallFastModel string
+	HaikuModel     string
+	SonnetModel    string
+	OpusModel      string
 }
 
 type Runner struct {
@@ -90,7 +93,7 @@ func buildEnv(ctx *config.Context, opts Options) []string {
 	filtered = append(filtered, "ANTHROPIC_BASE_URL="+ctx.BaseURL)
 	filtered = append(filtered, "ANTHROPIC_AUTH_TOKEN="+ctx.AuthToken)
 
-	// Priority: CLI flag > config value > omit
+	// Model: opts > config > omit
 	model := opts.Model
 	if model == "" {
 		model = ctx.Model
@@ -99,12 +102,38 @@ func buildEnv(ctx *config.Context, opts Options) []string {
 		filtered = append(filtered, "ANTHROPIC_MODEL="+model)
 	}
 
-	sfm := opts.SmallFastModel
-	if sfm == "" {
-		sfm = ctx.SmallFastModel
+	// Haiku: opts.HaikuModel > opts.SmallFastModel > ctx.HaikuModel > ctx.SmallFastModel > omit
+	haiku := opts.HaikuModel
+	if haiku == "" {
+		haiku = opts.SmallFastModel
 	}
-	if sfm != "" {
-		filtered = append(filtered, "ANTHROPIC_SMALL_FAST_MODEL="+sfm)
+	if haiku == "" {
+		haiku = ctx.HaikuModel
 	}
+	if haiku == "" {
+		haiku = ctx.SmallFastModel
+	}
+	if haiku != "" {
+		filtered = append(filtered, "ANTHROPIC_DEFAULT_HAIKU_MODEL="+haiku)
+	}
+
+	// Sonnet: opts > config > omit
+	sonnet := opts.SonnetModel
+	if sonnet == "" {
+		sonnet = ctx.SonnetModel
+	}
+	if sonnet != "" {
+		filtered = append(filtered, "ANTHROPIC_DEFAULT_SONNET_MODEL="+sonnet)
+	}
+
+	// Opus: opts > config > omit
+	opus := opts.OpusModel
+	if opus == "" {
+		opus = ctx.OpusModel
+	}
+	if opus != "" {
+		filtered = append(filtered, "ANTHROPIC_DEFAULT_OPUS_MODEL="+opus)
+	}
+
 	return filtered
 }

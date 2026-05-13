@@ -166,3 +166,92 @@ func TestConfigFilePermissions(t *testing.T) {
 		})
 	}
 }
+
+func TestGetContext_ModelFields(t *testing.T) {
+	tests := []struct {
+		name               string
+		configTOML         string
+		wantModel          string
+		wantSmallFastModel string
+		wantHaikuModel     string
+		wantSonnetModel    string
+		wantOpusModel      string
+	}{
+		{
+			name: "all five model fields present",
+			configTOML: `[context.test]
+base_url = "https://api.example.com"
+auth_token = "test-token"
+model = "claude-sonnet-4-6"
+small_fast_model = "claude-haiku-4-5"
+haiku_model = "claude-haiku-4-5-20251001"
+sonnet_model = "claude-sonnet-4-6"
+opus_model = "claude-opus-4-7"
+`,
+			wantModel:          "claude-sonnet-4-6",
+			wantSmallFastModel: "claude-haiku-4-5",
+			wantHaikuModel:     "claude-haiku-4-5-20251001",
+			wantSonnetModel:    "claude-sonnet-4-6",
+			wantOpusModel:      "claude-opus-4-7",
+		},
+		{
+			name: "only small_fast_model set, haiku_model empty",
+			configTOML: `[context.test]
+base_url = "https://api.example.com"
+auth_token = "test-token"
+small_fast_model = "claude-haiku-4-5"
+`,
+			wantModel:          "",
+			wantSmallFastModel: "claude-haiku-4-5",
+			wantHaikuModel:     "",
+			wantSonnetModel:    "",
+			wantOpusModel:      "",
+		},
+		{
+			name: "no model fields set",
+			configTOML: `[context.test]
+base_url = "https://api.example.com"
+auth_token = "test-token"
+`,
+			wantModel:          "",
+			wantSmallFastModel: "",
+			wantHaikuModel:     "",
+			wantSonnetModel:    "",
+			wantOpusModel:      "",
+		},
+		{
+			name: "only new fields set",
+			configTOML: `[context.test]
+base_url = "https://api.example.com"
+auth_token = "test-token"
+haiku_model = "claude-haiku-4-5-20251001"
+sonnet_model = "claude-sonnet-4-6"
+opus_model = "claude-opus-4-7"
+`,
+			wantModel:          "",
+			wantSmallFastModel: "",
+			wantHaikuModel:     "claude-haiku-4-5-20251001",
+			wantSonnetModel:    "claude-sonnet-4-6",
+			wantOpusModel:      "claude-opus-4-7",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			configPath := filepath.Join(tmpDir, "config.toml")
+			err := os.WriteFile(configPath, []byte(tt.configTOML), 0600)
+			require.NoError(t, err)
+			t.Setenv("CCCTX_CONFIG_PATH", configPath)
+
+			ctx, err := GetContext("test")
+			require.NoError(t, err)
+
+			assert.Equal(t, tt.wantModel, ctx.Model)
+			assert.Equal(t, tt.wantSmallFastModel, ctx.SmallFastModel)
+			assert.Equal(t, tt.wantHaikuModel, ctx.HaikuModel)
+			assert.Equal(t, tt.wantSonnetModel, ctx.SonnetModel)
+			assert.Equal(t, tt.wantOpusModel, ctx.OpusModel)
+		})
+	}
+}

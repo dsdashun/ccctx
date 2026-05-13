@@ -57,3 +57,7 @@
 
 - `claude` 二进制存在但不可执行时，`exec.LookPath` 成功但 `exec.Command` 会失败 [cmd/run.go:66-70]
 - `SHELL` 环境变量设为空字符串时会被当作目标命令传递 [cmd/exec.go:63-70]
+
+## Deferred from: code review of 4-1-config-runner-model-field-expansion (2026-05-13)
+
+- 集成测试 mock 脚本只捕获 ANTHROPIC_MODEL 和 ANTHROPIC_DEFAULT_HAIKU_MODEL，缺少 ANTHROPIC_DEFAULT_SONNET_MODEL 和 ANTHROPIC_DEFAULT_OPUS_MODEL 的端到端覆盖。待 Story 4.2 添加 CLI flags 后补充 [cmd/run_test.go, cmd/exec_test.go]
