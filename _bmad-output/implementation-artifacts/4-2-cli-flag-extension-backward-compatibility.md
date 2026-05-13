@@ -1,6 +1,6 @@
 # Story 4.2: CLI Flag Extension & Backward Compatibility
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -38,44 +38,44 @@ so that **I can temporarily switch models without editing the config file, using
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: RED — add failing tests for new flags in args_test.go (AC: #1-#8, #11, #13)
-  - [ ] Update `TestExtractFlags` test struct: rename `wantSmallFast` field to `wantHaikuModel`, add `wantSonnetModel` and `wantOpusModel` fields; update all existing test case values from `wantSmallFast: ...` to `wantHaikuModel: ...`; update call signature to unpack 6 return values
-  - [ ] Add test cases for each new flag: `--haiku-model`, `--sonnet-model`, `--opus-model` with provider
-  - [ ] Add test case: `--small-fast-model` sets `haikuModel` (alias verification)
-  - [ ] Add test case: both `--haiku-model` and `--small-fast-model` → `--haiku-model` wins
-  - [ ] Add test cases: new flags without value return error
-  - [ ] Add test cases: new flags with newline value return error
-  - [ ] Add test cases: new flags after `--` separator NOT extracted
-  - [ ] Add test cases: duplicate new flags — last wins
-  - [ ] Add test cases: all 5 flags combined
+- [x] Task 1: RED — add failing tests for new flags in args_test.go (AC: #1-#8, #11, #13)
+  - [x] Update `TestExtractFlags` test struct: rename `wantSmallFast` field to `wantHaikuModel`, add `wantSonnetModel` and `wantOpusModel` fields; update all existing test case values from `wantSmallFast: ...` to `wantHaikuModel: ...`; update call signature to unpack 6 return values
+  - [x] Add test cases for each new flag: `--haiku-model`, `--sonnet-model`, `--opus-model` with provider
+  - [x] Add test case: `--small-fast-model` sets `haikuModel` (alias verification)
+  - [x] Add test case: both `--haiku-model` and `--small-fast-model` → `--haiku-model` wins
+  - [x] Add test cases: new flags without value return error
+  - [x] Add test cases: new flags with newline value return error
+  - [x] Add test cases: new flags after `--` separator NOT extracted
+  - [x] Add test cases: duplicate new flags — last wins
+  - [x] Add test cases: all 5 flags combined
 
-- [ ] Task 2: GREEN — update ExtractFlags signature and implementation in args.go (AC: #1-#8, #11)
-  - [ ] Change signature from `(model, smallFastModel string, remaining []string, err error)` to `(model, haikuModel, sonnetModel, opusModel string, remaining []string, err error)`
-  - [ ] Add `case "--haiku-model"` branch: validate + set `haikuModel`
-  - [ ] Add `case "--sonnet-model"` branch: validate + set `sonnetModel`
-  - [ ] Add `case "--opus-model"` branch: validate + set `opusModel`
-  - [ ] Change `case "--small-fast-model"`: instead of setting `smallFastModel`, set `haikuModel` but only if `haikuModel` is still empty (so `--haiku-model` wins when both present)
-  - [ ] Remove `smallFastModel` return value entirely
+- [x] Task 2: GREEN — update ExtractFlags signature and implementation in args.go (AC: #1-#8, #11)
+  - [x] Change signature from `(model, smallFastModel string, remaining []string, err error)` to `(model, haikuModel, sonnetModel, opusModel string, remaining []string, err error)`
+  - [x] Add `case "--haiku-model"` branch: validate + set `haikuModel`
+  - [x] Add `case "--sonnet-model"` branch: validate + set `sonnetModel`
+  - [x] Add `case "--opus-model"` branch: validate + set `opusModel`
+  - [x] Change `case "--small-fast-model"`: instead of setting `smallFastModel`, set `haikuModel` but only if `haikuModel` is still empty (so `--haiku-model` wins when both present)
+  - [x] Remove `smallFastModel` return value entirely
 
-- [ ] Task 3: Update cmd/run.go and cmd/exec.go call sites (AC: #10)
-  - [ ] In `cmd/run.go:33`: change `model, smallFastModel, args, err := runner.ExtractFlags(args)` to `model, haikuModel, sonnetModel, opusModel, args, err := runner.ExtractFlags(args)`
-  - [ ] In `cmd/run.go:76-81`: update `runner.Options` construction to use `HaikuModel: haikuModel, SonnetModel: sonnetModel, OpusModel: opusModel` instead of `SmallFastModel: smallFastModel`
-  - [ ] In `cmd/exec.go:32`: same ExtractFlags signature change
-  - [ ] In `cmd/exec.go:74`: same Options construction change
+- [x] Task 3: Update cmd/run.go and cmd/exec.go call sites (AC: #10)
+  - [x] In `cmd/run.go:33`: change `model, smallFastModel, args, err := runner.ExtractFlags(args)` to `model, haikuModel, sonnetModel, opusModel, args, err := runner.ExtractFlags(args)`
+  - [x] In `cmd/run.go:76-81`: update `runner.Options` construction to use `HaikuModel: haikuModel, SonnetModel: sonnetModel, OpusModel: opusModel` instead of `SmallFastModel: smallFastModel`
+  - [x] In `cmd/exec.go:32`: same ExtractFlags signature change
+  - [x] In `cmd/exec.go:74`: same Options construction change
 
-- [ ] Task 4: Add integration tests for new flags in cmd/run_test.go and cmd/exec_test.go (AC: #1-#5, #13)
-  - [ ] Note: These tests will be GREEN-on-arrival (implementation is complete from Tasks 2+3). Manually cross-check expected values before writing tests to ensure they capture correct behavior.
-  - [ ] In `TestRunRun_ModelFlags`: add test cases for `--haiku-model`, `--sonnet-model`, `--opus-model` flags (verify env vars via mock script)
-  - [ ] In `TestRunRun_ModelFlags`: add test case for `--small-fast-model` alias (verify it sets `ANTHROPIC_DEFAULT_HAIKU_MODEL`)
-  - [ ] In `TestRunRun_ModelFlags`: add test case for `--haiku-model` priority over `--small-fast-model`
-  - [ ] Update mock script to also capture `$ANTHROPIC_DEFAULT_SONNET_MODEL` and `$ANTHROPIC_DEFAULT_OPUS_MODEL`
-  - [ ] Update test struct: rename `wantSFM` field to `wantHaikuModel`, add `wantSonnetModel` and `wantOpusModel` fields; update all existing test case values from `wantSFM: ...` to `wantHaikuModel: ...`
-  - [ ] Mirror same changes in `TestExecRun_ModelFlags`
+- [x] Task 4: Add integration tests for new flags in cmd/run_test.go and cmd/exec_test.go (AC: #1-#5, #13)
+  - [x] Note: These tests will be GREEN-on-arrival (implementation is complete from Tasks 2+3). Manually cross-check expected values before writing tests to ensure they capture correct behavior.
+  - [x] In `TestRunRun_ModelFlags`: add test cases for `--haiku-model`, `--sonnet-model`, `--opus-model` flags (verify env vars via mock script)
+  - [x] In `TestRunRun_ModelFlags`: add test case for `--small-fast-model` alias (verify it sets `ANTHROPIC_DEFAULT_HAIKU_MODEL`)
+  - [x] In `TestRunRun_ModelFlags`: add test case for `--haiku-model` priority over `--small-fast-model`
+  - [x] Update mock script to also capture `$ANTHROPIC_DEFAULT_SONNET_MODEL` and `$ANTHROPIC_DEFAULT_OPUS_MODEL`
+  - [x] Update test struct: rename `wantSFM` field to `wantHaikuModel`, add `wantSonnetModel` and `wantOpusModel` fields; update all existing test case values from `wantSFM: ...` to `wantHaikuModel: ...`
+  - [x] Mirror same changes in `TestExecRun_ModelFlags`
 
-- [ ] Task 5: Fix remaining test failures and verify (AC: #12)
-  - [ ] `go test ./...` — all tests pass
-  - [ ] `go vet ./...` — clean
-  - [ ] `make build` — static binary builds
+- [x] Task 5: Fix remaining test failures and verify (AC: #12)
+  - [x] `go test ./...` — all tests pass
+  - [x] `go vet ./...` — clean
+  - [x] `make build` — static binary builds
 
 ## Dev Notes
 
@@ -315,10 +315,38 @@ model, haiku, sonnet, opus, remaining, err := ExtractFlags(tt.args)
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+glm-5.1
 
 ### Debug Log References
 
 ### Completion Notes List
 
+- ✅ Task 1: RED — Updated TestExtractFlags struct from wantSmallFast→wantHaikuModel, added wantSonnetModel/wantOpusModel fields. Added 18 new test cases covering all new flags, alias, priority, errors, newline validation, separator boundary, duplicates, and combined scenarios. Tests confirmed failing before implementation.
+- ✅ Task 2: GREEN — Updated ExtractFlags signature to return 6 values (model, haikuModel, sonnetModel, opusModel, remaining, err). Added --haiku-model, --sonnet-model, --opus-model branches with validation. Changed --small-fast-model to use sfmAlias with post-loop priority resolution (haiku-model wins). All 34 args_test.go tests pass.
+- ✅ Task 3: Updated cmd/run.go and cmd/exec.go ExtractFlags call sites (4→6 return values) and Options construction (SmallFastModel→HaikuModel/SonnetModel/OpusModel). Build succeeds.
+- ✅ Task 4: Added integration tests in run_test.go (6 new cases) and exec_test.go (5 new cases). Updated mock scripts to capture ANTHROPIC_DEFAULT_SONNET_MODEL and ANTHROPIC_DEFAULT_OPUS_MODEL. All integration tests pass.
+- ✅ Task 5: go test ./... PASS, go vet ./... clean, make build succeeds. Zero regressions.
+
 ### File List
+
+- internal/runner/args.go — MODIFIED: Expanded ExtractFlags with 3 new flag branches + alias logic
+- internal/runner/args_test.go — MODIFIED: Updated test struct + added 18 new test cases
+- cmd/run.go — MODIFIED: Updated ExtractFlags call site + Options construction
+- cmd/exec.go — MODIFIED: Updated ExtractFlags call site + Options construction
+- cmd/run_test.go — MODIFIED: Added integration tests for new flags, updated mock script
+- cmd/exec_test.go — MODIFIED: Added integration tests for new flags, updated mock script
+
+### Review Findings
+
+- [x] [Review][Patch] Integration tests missing error-path coverage for new flags [cmd/run_test.go, cmd/exec_test.go]
+- [x] [Review][Patch] Flag-value-looking-like-flag tests only cover --model consuming --small-fast-model, not the new flag names [internal/runner/args_test.go]
+- [x] [Review][Patch] all 5 flags combined integration tests omit --small-fast-model (alias coverage gap in end-to-end) [cmd/run_test.go, cmd/exec_test.go]
+- [x] [Review][Patch] No test for nil or empty args slice to ExtractFlags [internal/runner/args_test.go]
+- [x] [Review][Patch] No test for flag at end of argument list with missing value (e.g., `{"provider-A", "--haiku-model"}`) [internal/runner/args_test.go]
+- [x] [Review][Patch] AC5 reverse ordering test missing (--small-fast-model before --haiku-model) [internal/runner/args_test.go]
+- [x] [Review][Defer] Near-identical test tables duplicated across exec_test.go and run_test.go — deferred, pre-existing
+- [x] [Review][Defer] validateFlagValue returns ambiguous error messages without flag context — deferred, pre-existing
+- [x] [Review][Defer] exec_test.go missing general error-path tests (pre-existing, not caused by this change) — deferred, pre-existing
+- [x] [Review][Defer] --haiku-model "" (explicit empty) can be silently overridden by --small-fast-model alias — deferred, extremely unlikely edge case
+- [x] [Review][Defer] Mock script line ordering fragile to future env var injection changes — deferred, design observation
+- [x] [Review][Defer] No tests for unicode or extremely long flag values — deferred, low priority

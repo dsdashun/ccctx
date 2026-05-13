@@ -12,9 +12,10 @@ func validateFlagValue(name, value string) error {
 	return nil
 }
 
-// ExtractFlags extracts --model and --small-fast-model from args before the -- separator.
+// ExtractFlags extracts --model, --haiku-model, --sonnet-model, --opus-model, and --small-fast-model from args before the -- separator.
+// --small-fast-model is an alias for --haiku-model (--haiku-model wins when both specified).
 // Extracted flags are removed from the returned remaining args.
-func ExtractFlags(args []string) (model, smallFastModel string, remaining []string, err error) {
+func ExtractFlags(args []string) (model, haikuModel, sonnetModel, opusModel string, remaining []string, err error) {
 	sepIdx := len(args)
 	for i, a := range args {
 		if a == "--" {
@@ -25,26 +26,54 @@ func ExtractFlags(args []string) (model, smallFastModel string, remaining []stri
 
 	remaining = make([]string, 0, len(args))
 	preSep := args[:sepIdx]
+	var sfmAlias string
 	i := 0
 	for i < len(preSep) {
 		switch preSep[i] {
 		case "--model":
 			if i+1 >= len(preSep) {
-				return "", "", []string{}, fmt.Errorf("--model requires a value")
+				return "", "", "", "", []string{}, fmt.Errorf("--model requires a value")
 			}
 			if err := validateFlagValue("--model", preSep[i+1]); err != nil {
-				return "", "", []string{}, err
+				return "", "", "", "", []string{}, err
 			}
 			model = preSep[i+1]
 			i += 2
+		case "--haiku-model":
+			if i+1 >= len(preSep) {
+				return "", "", "", "", []string{}, fmt.Errorf("--haiku-model requires a value")
+			}
+			if err := validateFlagValue("--haiku-model", preSep[i+1]); err != nil {
+				return "", "", "", "", []string{}, err
+			}
+			haikuModel = preSep[i+1]
+			i += 2
+		case "--sonnet-model":
+			if i+1 >= len(preSep) {
+				return "", "", "", "", []string{}, fmt.Errorf("--sonnet-model requires a value")
+			}
+			if err := validateFlagValue("--sonnet-model", preSep[i+1]); err != nil {
+				return "", "", "", "", []string{}, err
+			}
+			sonnetModel = preSep[i+1]
+			i += 2
+		case "--opus-model":
+			if i+1 >= len(preSep) {
+				return "", "", "", "", []string{}, fmt.Errorf("--opus-model requires a value")
+			}
+			if err := validateFlagValue("--opus-model", preSep[i+1]); err != nil {
+				return "", "", "", "", []string{}, err
+			}
+			opusModel = preSep[i+1]
+			i += 2
 		case "--small-fast-model":
 			if i+1 >= len(preSep) {
-				return "", "", []string{}, fmt.Errorf("--small-fast-model requires a value")
+				return "", "", "", "", []string{}, fmt.Errorf("--small-fast-model requires a value")
 			}
 			if err := validateFlagValue("--small-fast-model", preSep[i+1]); err != nil {
-				return "", "", []string{}, err
+				return "", "", "", "", []string{}, err
 			}
-			smallFastModel = preSep[i+1]
+			sfmAlias = preSep[i+1]
 			i += 2
 		default:
 			remaining = append(remaining, preSep[i])
@@ -52,11 +81,16 @@ func ExtractFlags(args []string) (model, smallFastModel string, remaining []stri
 		}
 	}
 
+	// Resolve alias: --haiku-model wins over --small-fast-model
+	if haikuModel == "" && sfmAlias != "" {
+		haikuModel = sfmAlias
+	}
+
 	if sepIdx < len(args) {
 		remaining = append(remaining, args[sepIdx:]...)
 	}
 
-	return model, smallFastModel, remaining, nil
+	return model, haikuModel, sonnetModel, opusModel, remaining, nil
 }
 
 // WantsHelp checks if --help or -h appears before -- in args.

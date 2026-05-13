@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-05-13
-last_updated: 2026-05-13T22:00
+last_updated: 2026-05-13T23:00
 project: ccctx
 project_key: NOKEY
 tracking_system: file-system
@@ -65,7 +65,7 @@ development_status:
   # Epic 4: Claude Code Model Environment Variable Update
   epic-4: in-progress
   4-1-config-runner-model-field-expansion: done
-  4-2-cli-flag-extension-backward-compatibility: ready-for-dev
+  4-2-cli-flag-extension-backward-compatibility: done
   epic-4-retrospective: optional
 
   # Epic 5: Tech Debt & Code Quality

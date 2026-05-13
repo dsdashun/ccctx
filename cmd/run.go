@@ -30,7 +30,7 @@ var RunCmd = &cobra.Command{
 }
 
 func runRun(args []string) int {
-	model, smallFastModel, args, err := runner.ExtractFlags(args)
+	model, haikuModel, sonnetModel, opusModel, args, err := runner.ExtractFlags(args)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		return 1
@@ -74,10 +74,12 @@ func runRun(args []string) int {
 	target := append([]string{claudePath}, targetArgs...)
 
 	r, err := runner.New(runner.Options{
-		ContextName:    provider,
-		Target:         target,
-		Model:          model,
-		SmallFastModel: smallFastModel,
+		ContextName: provider,
+		Target:      target,
+		Model:       model,
+		HaikuModel:  haikuModel,
+		SonnetModel: sonnetModel,
+		OpusModel:   opusModel,
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)

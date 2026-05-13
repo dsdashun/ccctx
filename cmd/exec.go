@@ -29,7 +29,7 @@ var ExecCmd = &cobra.Command{
 }
 
 func execRun(args []string) int {
-	model, smallFastModel, args, err := runner.ExtractFlags(args)
+	model, haikuModel, sonnetModel, opusModel, args, err := runner.ExtractFlags(args)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		return 1
@@ -71,7 +71,7 @@ func execRun(args []string) int {
 		targetArgs = []string{shell}
 	}
 
-	opts := runner.Options{ContextName: provider, Target: targetArgs, Model: model, SmallFastModel: smallFastModel}
+	opts := runner.Options{ContextName: provider, Target: targetArgs, Model: model, HaikuModel: haikuModel, SonnetModel: sonnetModel, OpusModel: opusModel}
 	r, err := runner.New(opts)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
