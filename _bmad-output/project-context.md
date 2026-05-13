@@ -126,7 +126,8 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - TUI cancellation exits with code 1, not 0 — cancellation is an abort, not a success
 - Validate `$SHELL != ""` before using it as default target for exec
 - First arg without `--` is always treated as provider name — no TUI fallback for unknown names (breaking change from current behavior)
-- `Context` struct fields `Model` and `SmallFastModel` are optional — always check for empty string before setting env vars
+- `Context` struct fields `Model`, `HaikuModel`, `SonnetModel`, `OpusModel` are optional — always check for empty string before setting env vars. `SmallFastModel` is deprecated but retained for backward compat (maps to haiku via priority chain).
+- `ANTHROPIC_SMALL_FAST_MODEL` is never injected — `ANTHROPIC_DEFAULT_HAIKU_MODEL` supersedes it
 - Runner boundary: may import `config/` and stdlib only; must NOT import `internal/ui/` or `cmd/`
 
 ---
