@@ -61,3 +61,12 @@
 ## Deferred from: code review of 4-1-config-runner-model-field-expansion (2026-05-13)
 
 - 集成测试 mock 脚本只捕获 ANTHROPIC_MODEL 和 ANTHROPIC_DEFAULT_HAIKU_MODEL，缺少 ANTHROPIC_DEFAULT_SONNET_MODEL 和 ANTHROPIC_DEFAULT_OPUS_MODEL 的端到端覆盖。待 Story 4.2 添加 CLI flags 后补充 [cmd/run_test.go, cmd/exec_test.go]
+
+## Deferred from: code review of 4-2-cli-flag-extension-backward-compatibility (2026-05-13)
+
+- Near-identical test tables duplicated across exec_test.go and run_test.go — pre-existing pattern
+- validateFlagValue returns ambiguous error messages without flag context — pre-existing (same pattern was used for --model, --small-fast-model)
+- exec_test.go missing general error-path tests (pre-existing, not caused by this change)
+- --haiku-model "" (explicit empty) can be silently overridden by --small-fast-model alias — extremely unlikely edge case
+- Mock script line ordering fragile to future env var injection changes — design observation
+- No tests for unicode or extremely long flag values — low priority

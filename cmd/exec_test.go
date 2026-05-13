@@ -12,21 +12,22 @@ import (
 
 func TestExecRun_ModelFlags(t *testing.T) {
 	tests := []struct {
-		name       string
-		args       []string
-		configTOML string
-		envSetup   func(t *testing.T, mockDir string, outputFile string)
-		wantCode   int
-		wantModel  string
-		wantSFM    string
+		name            string
+		args            []string
+		configTOML      string
+		wantCode        int
+		wantModel       string
+		wantHaikuModel  string
+		wantSonnetModel string
+		wantOpusModel   string
 	}{
 		{
 			name: "--model flag sets ANTHROPIC_MODEL via shell",
 			args: []string{"--model", "claude-opus-4-7", "test"},
 			configTOML: `[context.test]
-	base_url = "https://api.example.com"
-	auth_token = "test-token"
-	`,
+		base_url = "https://api.example.com"
+		auth_token = "test-token"
+		`,
 			wantCode:  0,
 			wantModel: "claude-opus-4-7",
 		},
@@ -34,50 +35,130 @@ func TestExecRun_ModelFlags(t *testing.T) {
 			name: "--model without value returns error",
 			args: []string{"--model"},
 			configTOML: `[context.test]
-	base_url = "https://api.example.com"
-	auth_token = "test-token"
-	`,
+		base_url = "https://api.example.com"
+		auth_token = "test-token"
+		`,
 			wantCode: 1,
 		},
 		{
 			name: "--small-fast-model without value returns error",
 			args: []string{"--small-fast-model"},
 			configTOML: `[context.test]
-	base_url = "https://api.example.com"
-	auth_token = "test-token"
-	`,
+		base_url = "https://api.example.com"
+		auth_token = "test-token"
+		`,
+			wantCode: 1,
+		},
+		{
+			name:       "--haiku-model without value returns error",
+			args:       []string{"--haiku-model"},
+			configTOML: `[context.test]
+		base_url = "https://api.example.com"
+		auth_token = "test-token"
+		`,
+			wantCode: 1,
+		},
+		{
+			name:       "--sonnet-model without value returns error",
+			args:       []string{"--sonnet-model"},
+			configTOML: `[context.test]
+		base_url = "https://api.example.com"
+		auth_token = "test-token"
+		`,
+			wantCode: 1,
+		},
+		{
+			name:       "--opus-model without value returns error",
+			args:       []string{"--opus-model"},
+			configTOML: `[context.test]
+		base_url = "https://api.example.com"
+		auth_token = "test-token"
+		`,
 			wantCode: 1,
 		},
 		{
 			name: "provider with --model and explicit target command",
 			args: []string{"test", "--model", "claude-opus-4-7", "--", "env"},
 			configTOML: `[context.test]
-	base_url = "https://api.example.com"
-	auth_token = "test-token"
-	`,
+		base_url = "https://api.example.com"
+		auth_token = "test-token"
+		`,
 			wantCode:  0,
 			wantModel: "claude-opus-4-7",
 		},
 		{
-			name: "--small-fast-model flag sets ANTHROPIC_DEFAULT_HAIKU_MODEL via shell",
-			args: []string{"--small-fast-model", "claude-sonnet-4-6", "test"},
+			name: "--small-fast-model alias sets ANTHROPIC_DEFAULT_HAIKU_MODEL via shell",
+			args: []string{"--small-fast-model", "claude-haiku-4-5-20251001", "test"},
 			configTOML: `[context.test]
-	base_url = "https://api.example.com"
-	auth_token = "test-token"
-	`,
-			wantCode: 0,
-			wantSFM:  "claude-sonnet-4-6",
+		base_url = "https://api.example.com"
+		auth_token = "test-token"
+		`,
+			wantCode:       0,
+			wantHaikuModel: "claude-haiku-4-5-20251001",
 		},
 		{
-			name: "both flags set both env vars via shell",
-			args: []string{"test", "--model", "claude-opus-4-7", "--small-fast-model", "claude-sonnet-4-6"},
+			name: "both --model and --small-fast-model set env vars via shell",
+			args: []string{"test", "--model", "claude-opus-4-7", "--small-fast-model", "claude-haiku-4-5-20251001"},
 			configTOML: `[context.test]
-	base_url = "https://api.example.com"
-	auth_token = "test-token"
-	`,
-			wantCode:  0,
-			wantModel: "claude-opus-4-7",
-			wantSFM:   "claude-sonnet-4-6",
+		base_url = "https://api.example.com"
+		auth_token = "test-token"
+		`,
+			wantCode:       0,
+			wantModel:      "claude-opus-4-7",
+			wantHaikuModel: "claude-haiku-4-5-20251001",
+		},
+		{
+			name: "--haiku-model flag sets ANTHROPIC_DEFAULT_HAIKU_MODEL via shell",
+			args: []string{"--haiku-model", "claude-haiku-4-5-20251001", "test"},
+			configTOML: `[context.test]
+		base_url = "https://api.example.com"
+		auth_token = "test-token"
+		`,
+			wantCode:       0,
+			wantHaikuModel: "claude-haiku-4-5-20251001",
+		},
+		{
+			name: "--sonnet-model flag sets ANTHROPIC_DEFAULT_SONNET_MODEL via shell",
+			args: []string{"--sonnet-model", "claude-sonnet-4-6", "test"},
+			configTOML: `[context.test]
+		base_url = "https://api.example.com"
+		auth_token = "test-token"
+		`,
+			wantCode:        0,
+			wantSonnetModel: "claude-sonnet-4-6",
+		},
+		{
+			name: "--opus-model flag sets ANTHROPIC_DEFAULT_OPUS_MODEL via shell",
+			args: []string{"--opus-model", "claude-opus-4-7", "test"},
+			configTOML: `[context.test]
+		base_url = "https://api.example.com"
+		auth_token = "test-token"
+		`,
+			wantCode:      0,
+			wantOpusModel: "claude-opus-4-7",
+		},
+		{
+			name: "--haiku-model wins over --small-fast-model via shell",
+			args: []string{"test", "--haiku-model", "X", "--small-fast-model", "Y"},
+			configTOML: `[context.test]
+		base_url = "https://api.example.com"
+		auth_token = "test-token"
+		`,
+			wantCode:       0,
+			wantHaikuModel: "X",
+		},
+		{
+			name: "all model flags combined via shell",
+			args: []string{"test", "--model", "m", "--haiku-model", "h", "--sonnet-model", "s", "--opus-model", "o", "--small-fast-model", "sf"},
+			configTOML: `[context.test]
+		base_url = "https://api.example.com"
+		auth_token = "test-token"
+		`,
+			wantCode:        0,
+			wantModel:       "m",
+			wantHaikuModel:  "h",
+			wantSonnetModel: "s",
+			wantOpusModel:   "o",
 		},
 	}
 
@@ -93,7 +174,7 @@ func TestExecRun_ModelFlags(t *testing.T) {
 			t.Setenv("MOCK_OUTPUT_FILE", outputFile)
 
 			mockDir := t.TempDir()
-			mockScript := []byte("#!/bin/sh\necho \"$ANTHROPIC_MODEL\" > \"$MOCK_OUTPUT_FILE\"\necho \"$ANTHROPIC_DEFAULT_HAIKU_MODEL\" >> \"$MOCK_OUTPUT_FILE\"\nexit 0")
+			mockScript := []byte("#!/bin/sh\necho \"$ANTHROPIC_MODEL\" > \"$MOCK_OUTPUT_FILE\"\necho \"$ANTHROPIC_DEFAULT_HAIKU_MODEL\" >> \"$MOCK_OUTPUT_FILE\"\necho \"$ANTHROPIC_DEFAULT_SONNET_MODEL\" >> \"$MOCK_OUTPUT_FILE\"\necho \"$ANTHROPIC_DEFAULT_OPUS_MODEL\" >> \"$MOCK_OUTPUT_FILE\"\nexit 0")
 
 			// Determine mock name based on whether args include explicit target after --
 			hasExplicitTarget := false
@@ -134,9 +215,17 @@ func TestExecRun_ModelFlags(t *testing.T) {
 					require.GreaterOrEqual(t, len(lines), 1, "mock did not write ANTHROPIC_MODEL")
 					assert.Equal(t, tt.wantModel, lines[0])
 				}
-				if tt.wantSFM != "" {
+				if tt.wantHaikuModel != "" {
 					require.GreaterOrEqual(t, len(lines), 2, "mock did not write ANTHROPIC_DEFAULT_HAIKU_MODEL")
-					assert.Equal(t, tt.wantSFM, lines[1])
+					assert.Equal(t, tt.wantHaikuModel, lines[1])
+				}
+				if tt.wantSonnetModel != "" {
+					require.GreaterOrEqual(t, len(lines), 3, "mock did not write ANTHROPIC_DEFAULT_SONNET_MODEL")
+					assert.Equal(t, tt.wantSonnetModel, lines[2])
+				}
+				if tt.wantOpusModel != "" {
+					require.GreaterOrEqual(t, len(lines), 4, "mock did not write ANTHROPIC_DEFAULT_OPUS_MODEL")
+					assert.Equal(t, tt.wantOpusModel, lines[3])
 				}
 			}
 		})
