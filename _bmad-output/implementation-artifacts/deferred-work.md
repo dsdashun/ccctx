@@ -70,3 +70,10 @@
 - --haiku-model "" (explicit empty) can be silently overridden by --small-fast-model alias — extremely unlikely edge case
 - Mock script line ordering fragile to future env var injection changes — design observation
 - No tests for unicode or extremely long flag values — low priority
+
+## Deferred from: code review of 4-3-test-quality-and-error-message-improvement (2026-05-13)
+
+- TestExecRun 错误路径测试缺少 mock 隔离 [cmd/exec_test.go] — 与 TestRunRun 错误路径测试模式一致；runner.New() 校验先于 exec.LookPath，且 -- "env" 显式绕过 SHELL 查找
+- TestExecRun 未覆盖 ParseArgs 错误路径 [cmd/exec_test.go] — AC3 明确限定了 4 种错误路径，不包含 ParseArgs
+- TestExecRun 未覆盖 $SHELL 默认目标路径 [cmd/exec_test.go] — 不在 AC3 范围内，exec 的 SHELL fallback 是独立关注点
+- validateFlagValue 仅拒绝 \n，不拒绝 \r 等控制字符 [internal/runner/args.go:9] — 已有行为，非本次改动引入

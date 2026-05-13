@@ -27,6 +27,7 @@ func ExtractFlags(args []string) (model, haikuModel, sonnetModel, opusModel stri
 	remaining = make([]string, 0, len(args))
 	preSep := args[:sepIdx]
 	var sfmAlias string
+	var haikuModelSet bool
 	i := 0
 	for i < len(preSep) {
 		switch preSep[i] {
@@ -47,6 +48,7 @@ func ExtractFlags(args []string) (model, haikuModel, sonnetModel, opusModel stri
 				return "", "", "", "", []string{}, err
 			}
 			haikuModel = preSep[i+1]
+			haikuModelSet = true
 			i += 2
 		case "--sonnet-model":
 			if i+1 >= len(preSep) {
@@ -81,8 +83,10 @@ func ExtractFlags(args []string) (model, haikuModel, sonnetModel, opusModel stri
 		}
 	}
 
-	// Resolve alias: --haiku-model wins over --small-fast-model
-	if haikuModel == "" && sfmAlias != "" {
+	// Resolve alias: --haiku-model wins over --small-fast-model.
+	// Only apply --small-fast-model if --haiku-model was never explicitly set,
+	// so that `--haiku-model ""` (explicit empty) is not silently overridden.
+	if !haikuModelSet && sfmAlias != "" {
 		haikuModel = sfmAlias
 	}
 

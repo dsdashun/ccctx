@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -418,6 +419,51 @@ func TestExtractFlags(t *testing.T) {
 			wantHaikuModel:  "",
 			wantSonnetModel: "",
 			wantOpusModel:   "--model",
+			wantRemaining:   []string{"provider-A"},
+		},
+		{
+			name:           "--haiku-model explicit empty wins over --small-fast-model",
+			args:           []string{"provider-A", "--haiku-model", "", "--small-fast-model", "X"},
+			wantModel:      "",
+			wantHaikuModel: "",
+			wantSonnetModel: "",
+			wantOpusModel:   "",
+			wantRemaining:  []string{"provider-A"},
+		},
+		{
+			name:           "--haiku-model explicit empty wins over --small-fast-model (reverse order)",
+			args:           []string{"provider-A", "--small-fast-model", "X", "--haiku-model", ""},
+			wantModel:      "",
+			wantHaikuModel: "",
+			wantSonnetModel: "",
+			wantOpusModel:   "",
+			wantRemaining:  []string{"provider-A"},
+		},
+		{
+			name:           "--model with unicode value",
+			args:           []string{"provider-A", "--model", "claude-日本語"},
+			wantModel:      "claude-日本語",
+			wantHaikuModel:  "",
+			wantSonnetModel: "",
+			wantOpusModel:   "",
+			wantRemaining:   []string{"provider-A"},
+		},
+		{
+			name:           "--haiku-model with 1000+ character value",
+			args:           []string{"provider-A", "--haiku-model", strings.Repeat("a", 1001)},
+			wantModel:      "",
+			wantHaikuModel:  strings.Repeat("a", 1001),
+			wantSonnetModel: "",
+			wantOpusModel:   "",
+			wantRemaining:   []string{"provider-A"},
+		},
+		{
+			name:           "--sonnet-model with unicode and special characters",
+			args:           []string{"provider-A", "--sonnet-model", "claude-日本語-çoğüşiöü"},
+			wantModel:      "",
+			wantHaikuModel:  "",
+			wantSonnetModel: "claude-日本語-çoğüşiöü",
+			wantOpusModel:   "",
 			wantRemaining:   []string{"provider-A"},
 		},
 	}

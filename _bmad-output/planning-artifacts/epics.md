@@ -460,6 +460,36 @@ So that **我可以临时切换模型而不修改配置文件，且 `--small-fas
 
 **Files changed:** `internal/runner/args.go`, `internal/runner/args_test.go`, `cmd/run.go`, `cmd/exec.go`
 
+### Story 4.3: Test Quality & Error Message Improvements
+
+As a **developer**,
+I want **清理 4.1/4.2 遗留的测试质量问题并改进错误消息**,
+So that **代码库在测试去重、错误可诊断性和边界覆盖方面达到一致的质量标准，为后续 Epic 打下干净的基础**.
+
+**Acceptance Criteria:**
+
+**Given** `cmd/run_test.go` 和 `cmd/exec_test.go` 中 `TestRunRun_ModelFlags` 与 `TestExecRun_ModelFlags` 的测试表
+**When** 检查两个测试函数
+**Then** 共享的测试逻辑（mock 脚本构建、输出解析、断言）提取为共用 helper，消除近乎重复的测试表
+
+**Given** `validateFlagValue` 返回的错误消息
+**When** 调用 `validateFlagValue("--haiku-model", "foo\nbar")`
+**Then** 错误消息包含 flag 名称（如 `"--haiku-model: value cannot contain newline"`），而非仅 `"value cannot contain newline"`
+
+**Given** `cmd/exec_test.go` 当前测试
+**When** 检查 error-path 覆盖
+**Then** 覆盖 `exec` 子命令的关键错误路径（context 未找到、base_url 缺失、auth_token 缺失等），与 `cmd/run_test.go` 对齐
+
+**Given** `ExtractFlags` 处理 unicode 或超长 flag value
+**When** 传入包含 unicode 字符或 1000+ 字符的 value
+**Then** 正常处理不崩溃，相关行为有测试覆盖
+
+**Given** `--haiku-model ""` 与 `--small-fast-model "X"` 同时使用
+**When** `ExtractFlags` 解析参数
+**Then** 行为明确且可预测（文档化为 known limitation 或 `--haiku-model` 始终优先）
+
+**Files changed:** `internal/runner/args.go`, `internal/runner/args_test.go`, `cmd/run_test.go`, `cmd/exec_test.go`
+
 ### Epic 4 Retrospective: optional
 
 ---
